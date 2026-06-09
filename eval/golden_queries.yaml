@@ -1,0 +1,20 @@
+# Golden queries for retrieval evaluation.
+#
+# Each entry asserts that a natural-language query should retrieve a moment
+# (or moments) inside a known video. When the eval runner sees entries here it
+# uses them; when this file is empty, it falls back to synthetic eval —
+# paraphrasing random transcript segments and checking that the paraphrase
+# retrieves its source.
+#
+# Schema:
+#   - query: "free-form question"
+#     expected:
+#       - video_id: "youtube_id"      # required
+#         t_min: 0                     # inclusive, seconds. Optional.
+#         t_max: 1800                  # inclusive, seconds. Optional.
+#     notes: "what this query is testing"   # optional
+#
+# A result is a "hit" if it shares video_id with any expected entry AND the
+# segment overlaps [t_min, t_max] when those bounds are present.
+
+queries: []

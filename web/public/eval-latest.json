@@ -1,0 +1,201 @@
+{
+  "ranAt": "2026-06-09T17:04:13.096Z",
+  "mode": "synthetic",
+  "k": 10,
+  "total": 5,
+  "recallAt5": 1,
+  "recallAt10": 1,
+  "mrr": 1,
+  "details": [
+    {
+      "query": "Discussing challenges and time management in servicing SMBs after four months in a new role.",
+      "notes": "synthetic — paraphrased from source segment",
+      "source": "synthetic",
+      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedTRange": [
+        19.6199989318848,
+        84.5400009155273
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 34.6199989318848,
+          "score": 0.5531461
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 0,
+          "score": 0.44404694
+        },
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 34.7999992370605,
+          "score": 0.42282805
+        },
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 0,
+          "score": 0.41362432
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 103.800003051758,
+          "score": 0.412102
+        }
+      ]
+    },
+    {
+      "query": "Benefits of starting at a small company for learning and salary potential.",
+      "notes": "synthetic — paraphrased from source segment",
+      "source": "synthetic",
+      "expectedVideo": "LGbS0GOZBNE",
+      "expectedTRange": [
+        397.720001220703,
+        462.600006103516
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 412.720001220703,
+          "score": 0.5704296
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 240.960006713867,
+          "score": 0.40267253
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 447.420013427734,
+          "score": 0.389539
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 378.679992675781,
+          "score": 0.37686872
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 309.640014648438,
+          "score": 0.34810108
+        }
+      ]
+    },
+    {
+      "query": "SMB churn rate, average sales per month, pricing strategy, revenue projections",
+      "notes": "synthetic — paraphrased from source segment",
+      "source": "synthetic",
+      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedTRange": [
+        123.339996337891,
+        188
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 138.339996337891,
+          "score": 0.5580436
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 172.399993896484,
+          "score": 0.50752306
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 69.4000015258789,
+          "score": 0.47159728
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 0,
+          "score": 0.4471939
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 103.800003051758,
+          "score": 0.42600676
+        }
+      ]
+    },
+    {
+      "query": "Impact of churn and rising CAC on SMB margins and revenue growth.",
+      "notes": "synthetic — paraphrased from source segment",
+      "source": "synthetic",
+      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedTRange": [
+        54.400001525878906,
+        118.860000610352
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 69.4000015258789,
+          "score": 0.6705977
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 309.640014648438,
+          "score": 0.51895833
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 138.339996337891,
+          "score": 0.45560503
+        },
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 0,
+          "score": 0.42582202
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 172.399993896484,
+          "score": 0.41156852
+        }
+      ]
+    },
+    {
+      "query": "Discussion about revenue, sales position, and past hustles including mailbox replacements.",
+      "notes": "synthetic — paraphrased from source segment",
+      "source": "synthetic",
+      "expectedVideo": "LGbS0GOZBNE",
+      "expectedTRange": [
+        123.339996337891,
+        188.020004272461
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 138.339996337891,
+          "score": 0.60221094
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 0,
+          "score": 0.41859645
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 103.800003051758,
+          "score": 0.3923262
+        },
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 0,
+          "score": 0.35799187
+        },
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 34.7999992370605,
+          "score": 0.3408636
+        }
+      ]
+    }
+  ]
+}
