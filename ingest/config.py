@@ -26,9 +26,12 @@ BLOB_READ_WRITE_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
 
 QDRANT_COLLECTION_SEGMENTS = "segments"
 QDRANT_COLLECTION_FRAMES = "frames"
+QDRANT_COLLECTION_MOMENTS = "moments"
 
 TEXT_EMBED_MODEL = "text-embedding-3-small"
 TEXT_EMBED_DIM = 1536
+
+CHAT_MODEL = "gpt-4o-mini"
 
 CLIP_MODEL = "ViT-L-14"
 CLIP_PRETRAINED = "laion2b_s32b_b82k"

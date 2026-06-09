@@ -17,3 +17,7 @@ open-clip-torch>=2.30.0
 
 # HTTP for Vercel Blob upload
 httpx>=0.27.0
+
+# Audio features (quality + energy) for clip-worthiness scoring
+librosa>=0.10.2
+soundfile>=0.12.1

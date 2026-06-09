@@ -8,6 +8,7 @@ from config import (
     CLIP_DIM,
     QDRANT_API_KEY,
     QDRANT_COLLECTION_FRAMES,
+    QDRANT_COLLECTION_MOMENTS,
     QDRANT_COLLECTION_SEGMENTS,
     QDRANT_URL,
     TEXT_EMBED_DIM,
@@ -43,8 +44,19 @@ def ensure_collections() -> dict[str, str]:
         )
         status[QDRANT_COLLECTION_FRAMES] = "created"
 
+    if QDRANT_COLLECTION_MOMENTS in existing:
+        status[QDRANT_COLLECTION_MOMENTS] = "exists"
+    else:
+        c.create_collection(
+            collection_name=QDRANT_COLLECTION_MOMENTS,
+            vectors_config=VectorParams(size=TEXT_EMBED_DIM, distance=Distance.COSINE),
+        )
+        status[QDRANT_COLLECTION_MOMENTS] = "created"
+
     _ensure_payload_index(c, QDRANT_COLLECTION_SEGMENTS, "video_id")
     _ensure_payload_index(c, QDRANT_COLLECTION_FRAMES, "video_id")
+    for field in ("video_id", "kind", "industry", "revenue_band", "problems"):
+        _ensure_payload_index(c, QDRANT_COLLECTION_MOMENTS, field)
 
     return status
 

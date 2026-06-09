@@ -16,28 +16,57 @@ async function buildServer(): Promise<McpServer> {
   server.registerTool(
     "search_moments",
     {
-      title: "Search moments",
+      title: "Search Q&A moments",
       description:
-        "Search ranked, timestamped moments across the indexed long-form video library. " +
-        "Returns up to k results, each with the video, the start/end timestamps, the transcript text, " +
-        "the URL to play at that moment, and the score.",
+        "Search clip-ready attendee-question + Alex-answer pairs across the workshop library. " +
+        "Each result includes both the question and answer text with timestamps, the attendee's " +
+        "business context (industry, revenue band, problem tags), audio quality, and a clip " +
+        "score. Filter by speaker side, industry, revenue band, problem tags, and minimum " +
+        "audio quality.",
       inputSchema: {
         query: z.string().min(1).describe("Natural-language description of the moment."),
-        k: z
-          .number()
-          .int()
-          .min(1)
-          .max(50)
-          .default(10)
-          .describe("Maximum number of moments to return."),
-        video_id: z
+        k: z.number().int().min(1).max(50).default(10).describe("Max results to return."),
+        video_id: z.string().optional().describe("Restrict to a single video id."),
+        speaker: z
+          .enum(["answer", "question", "both"])
+          .default("answer")
+          .describe(
+            "Which side of the Q&A pair to match against. 'answer' (default) ranks by " +
+              "Alex's reply; 'question' ranks by the attendee's question; 'both' allows either.",
+          ),
+        industry: z
           .string()
           .optional()
-          .describe("Optional. Restrict the search to a single video id."),
+          .describe("Filter to attendees in this industry (free-form, e.g. 'med spa')."),
+        revenue_band: z
+          .enum(["<$1M", "$1-5M", "$5-10M", "$10-50M", "$50M+"])
+          .optional()
+          .describe("Filter to attendees in this annual revenue band."),
+        problems: z
+          .array(z.string())
+          .optional()
+          .describe(
+            "Filter to questions tagged with any of these problem areas (e.g. 'pricing', 'hiring').",
+          ),
+        min_audio_quality: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe("Floor for the moment's audio quality score (0-1). 0.6+ is recommended for clipping."),
       },
     },
-    async ({ query, k, video_id }) => {
-      const hits = await searchMoments({ query, k, videoId: video_id });
+    async ({ query, k, video_id, speaker, industry, revenue_band, problems, min_audio_quality }) => {
+      const hits = await searchMoments({
+        query,
+        k,
+        videoId: video_id,
+        speaker,
+        industry: industry || null,
+        revenueBand: revenue_band || null,
+        problems,
+        minAudioQuality: min_audio_quality,
+      });
       return {
         content: [
           {
@@ -47,10 +76,19 @@ async function buildServer(): Promise<McpServer> {
                 video_id: h.videoId,
                 video_title: h.videoTitle,
                 channel: h.channel,
-                start_s: h.startS,
-                end_s: h.endS,
-                text: h.text,
+                q_start_s: h.qStartS,
+                q_end_s: h.qEndS,
+                q_text: h.qText,
+                a_start_s: h.aStartS,
+                a_end_s: h.aEndS,
+                a_text: h.aText,
+                matched_kind: h.matchedKind,
                 score: h.score,
+                industry: h.industry,
+                revenue_band: h.revenueBand,
+                problems: h.problems,
+                audio_quality: h.audioQuality,
+                clip_score: h.clipScore,
                 play_url: h.playUrl,
                 frame_url: h.frameUrl,
               })),
@@ -82,7 +120,7 @@ async function buildServer(): Promise<McpServer> {
           v.duration_s,
           v.ingested_at,
           v.last_indexed_at,
-          (select count(*) from segments s where s.video_id = v.id) as segment_count,
+          (select count(*) from moments m where m.video_id = v.id) as moment_count,
           (select count(*) from frames f where f.video_id = v.id) as frame_count
         from videos v
         where v.id = ${video_id}

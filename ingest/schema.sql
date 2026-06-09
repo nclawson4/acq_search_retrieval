@@ -41,3 +41,27 @@ create table if not exists eval_runs (
     mrr               numeric,
     details           jsonb default '{}'::jsonb
 );
+
+-- Q→A moments: paired attendee question + Alex answer extracted via LLM
+-- diarization. Replaces the older "segments" abstraction at retrieval time.
+create table if not exists moments (
+    id                  bigserial primary key,
+    video_id            text not null references videos(id) on delete cascade,
+    q_start_s           numeric not null,
+    q_end_s             numeric not null,
+    q_text              text not null,
+    a_start_s           numeric not null,
+    a_end_s             numeric not null,
+    a_text              text not null,
+    industry            text,                            -- attendee industry, normalized
+    revenue_band        text,                            -- "<$1M" / "$1-5M" / "$5-10M" / "$10M+" / null
+    problems            text[] default '{}',             -- normalized problem tags
+    audio_quality       numeric,                         -- 0-1, higher is better
+    energy_peak         numeric,                         -- 0-1, normalized loudness peak in answer
+    clip_score          numeric,                         -- 0-1, composite clip-worthiness
+    a_qdrant_point_id   uuid not null unique,
+    q_qdrant_point_id   uuid not null unique
+);
+create index if not exists moments_video_time_idx on moments(video_id, a_start_s);
+create index if not exists moments_industry_idx on moments(industry);
+create index if not exists moments_revenue_idx on moments(revenue_band);

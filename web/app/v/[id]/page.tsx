@@ -39,11 +39,19 @@ interface VideoRow {
   ingested_at: string;
 }
 
-interface SegmentRow {
+interface MomentRow {
   id: number;
-  start_s: number;
-  end_s: number;
-  text: string;
+  q_start_s: number;
+  q_end_s: number;
+  q_text: string;
+  a_start_s: number;
+  a_end_s: number;
+  a_text: string;
+  industry: string | null;
+  revenue_band: string | null;
+  problems: string[] | null;
+  audio_quality: number | null;
+  clip_score: number | null;
   frame_url: string | null;
 }
 
@@ -56,24 +64,25 @@ async function fetchVideo(id: string) {
   `) as VideoRow[];
   if (videos.length === 0) return null;
 
-  const segments = (await sql()`
+  const moments = (await sql()`
     select
-      s.id,
-      s.start_s,
-      s.end_s,
-      s.text,
+      m.id,
+      m.q_start_s, m.q_end_s, m.q_text,
+      m.a_start_s, m.a_end_s, m.a_text,
+      m.industry, m.revenue_band, m.problems,
+      m.audio_quality, m.clip_score,
       (
         select f.blob_url from frames f
-        where f.video_id = s.video_id
-        order by abs(f.t_s - (s.start_s + s.end_s) / 2)
+        where f.video_id = m.video_id
+        order by abs(f.t_s - (m.a_start_s + m.a_end_s) / 2)
         limit 1
       ) as frame_url
-    from segments s
-    where s.video_id = ${id}
-    order by s.start_s
-  `) as SegmentRow[];
+    from moments m
+    where m.video_id = ${id}
+    order by m.q_start_s
+  `) as MomentRow[];
 
-  return { video: videos[0], segments };
+  return { video: videos[0], moments };
 }
 
 export default async function VideoPage({
@@ -85,16 +94,13 @@ export default async function VideoPage({
   const data = await fetchVideo(id);
   if (!data) notFound();
 
-  const { video, segments } = data;
+  const { video, moments } = data;
 
   return (
     <main className="flex flex-col items-center w-full px-4 sm:px-6 py-10 sm:py-16">
       <div className="w-full max-w-3xl">
         <p className="text-xs text-zinc-500 mb-2">
-          <a
-            href="/"
-            className="underline underline-offset-2 hover:no-underline"
-          >
+          <a href="/" className="underline underline-offset-2 hover:no-underline">
             ← back to search
           </a>
         </p>
@@ -104,7 +110,7 @@ export default async function VideoPage({
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             {video.channel || "Unknown channel"} · {fmtTime(Number(video.duration_s))} ·{" "}
-            {segments.length} indexed segment{segments.length === 1 ? "" : "s"}
+            {moments.length} Q&amp;A moment{moments.length === 1 ? "" : "s"}
           </p>
           <p className="mt-2 text-xs">
             <a
@@ -118,19 +124,18 @@ export default async function VideoPage({
           </p>
         </header>
 
-        {segments.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            This video has no indexed segments yet.
-          </p>
+        {moments.length === 0 ? (
+          <p className="text-sm text-zinc-500">This video has no indexed Q&amp;A moments yet.</p>
         ) : (
           <ol className="space-y-3">
-            {segments.map((seg) => {
+            {moments.map((m) => {
               const playUrl = `${video.url}${
                 video.url.includes("?") ? "&" : "?"
-              }t=${Math.floor(Number(seg.start_s))}s`;
+              }t=${Math.floor(Number(m.q_start_s))}s`;
+              const problems = Array.isArray(m.problems) ? m.problems : [];
               return (
                 <li
-                  key={seg.id}
+                  key={m.id}
                   className="group flex flex-col sm:flex-row gap-3 rounded-md border border-zinc-200 dark:border-zinc-800 p-3 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition relative"
                 >
                   <a
@@ -138,13 +143,13 @@ export default async function VideoPage({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="absolute inset-0 z-0"
-                    aria-label={`Play at ${fmtTime(Number(seg.start_s))}`}
+                    aria-label={`Play at ${fmtTime(Number(m.q_start_s))}`}
                   />
                   <div className="relative z-10 pointer-events-none contents">
-                    {seg.frame_url ? (
+                    {m.frame_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={seg.frame_url}
+                        src={m.frame_url}
                         alt=""
                         loading="lazy"
                         className="w-full sm:w-32 h-auto sm:h-20 object-cover rounded bg-zinc-200 dark:bg-zinc-800"
@@ -154,10 +159,37 @@ export default async function VideoPage({
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-zinc-500 tabular-nums mb-1">
-                        {fmtTime(Number(seg.start_s))} – {fmtTime(Number(seg.end_s))}
+                        {fmtTime(Number(m.q_start_s))} – {fmtTime(Number(m.a_end_s))}
                       </p>
-                      <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-3">
-                        {seg.text}
+                      {(m.industry || m.revenue_band || problems.length > 0) && (
+                        <div className="mb-1 flex flex-wrap gap-1 text-[10px] uppercase tracking-wide">
+                          {m.industry && (
+                            <span className="rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5">
+                              {m.industry}
+                            </span>
+                          )}
+                          {m.revenue_band && (
+                            <span className="rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5">
+                              {m.revenue_band}
+                            </span>
+                          )}
+                          {problems.slice(0, 3).map((p) => (
+                            <span
+                              key={p}
+                              className="rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5"
+                            >
+                              {p.replace(/_/g, " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">Q:</span>{" "}
+                        {m.q_text}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300 line-clamp-3">
+                        <span className="font-medium text-zinc-900 dark:text-zinc-100">A:</span>{" "}
+                        {m.a_text}
                       </p>
                     </div>
                   </div>

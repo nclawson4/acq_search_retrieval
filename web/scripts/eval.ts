@@ -110,14 +110,14 @@ async function paraphrase(text: string): Promise<string> {
 
 function isHit(
   expected: ExpectedHit,
-  hit: { videoId: string; startS: number; endS: number },
+  hit: { videoId: string; aStartS: number; aEndS: number },
 ): boolean {
   if (hit.videoId !== expected.video_id) return false;
   if (expected.t_min === undefined && expected.t_max === undefined) return true;
   const lo = expected.t_min ?? 0;
   const hi = expected.t_max ?? Number.MAX_SAFE_INTEGER;
-  // overlap test
-  return hit.endS >= lo && hit.startS <= hi;
+  // overlap test on the answer window
+  return hit.aEndS >= lo && hit.aStartS <= hi;
 }
 
 async function evalQuery(
@@ -146,17 +146,19 @@ async function evalQuery(
     rank,
     topHits: hits.slice(0, 5).map((h) => ({
       videoId: h.videoId,
-      startS: h.startS,
+      startS: h.aStartS,
       score: h.score,
     })),
   };
 }
 
 async function buildSyntheticQueries(n: number): Promise<GoldenQuery[]> {
+  // Sample answer text from moments (the indexed unit). Skip very short
+  // answers — they don't contain enough signal to paraphrase usefully.
   const rows = (await sql()`
-    select id, video_id, start_s, end_s, text
-    from segments
-    where char_length(text) > 200
+    select id, video_id, a_start_s as start_s, a_end_s as end_s, a_text as text
+    from moments
+    where char_length(a_text) > 200
     order by random()
     limit ${n}
   `) as Array<{ video_id: string; start_s: string; end_s: string; text: string }>;
@@ -174,7 +176,7 @@ async function buildSyntheticQueries(n: number): Promise<GoldenQuery[]> {
           t_max: Number(r.end_s) + 15,
         },
       ],
-      notes: "synthetic — paraphrased from source segment",
+      notes: "synthetic — paraphrased from source answer",
     });
   }
   return out;

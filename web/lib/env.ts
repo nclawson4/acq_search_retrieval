@@ -23,6 +23,28 @@ export const MCP_TOKEN = process.env.MCP_TOKEN ?? "";
 
 export const COLLECTION_SEGMENTS = "segments";
 export const COLLECTION_FRAMES = "frames";
+export const COLLECTION_MOMENTS = "moments";
 export const TEXT_EMBED_MODEL = "text-embedding-3-small";
 export const HYDE_MODEL = "gpt-4o-mini";
 export const SCORE_FLOOR = 0.35;
+export const REVENUE_BANDS = ["<$1M", "$1-5M", "$5-10M", "$10-50M", "$50M+"] as const;
+export const PROBLEM_TAGS = [
+  "pricing",
+  "offers",
+  "sales",
+  "marketing",
+  "hiring",
+  "team_building",
+  "operations",
+  "scaling",
+  "partnerships",
+  "acquisition",
+  "exit",
+  "raising_capital",
+  "product",
+  "retention",
+  "branding",
+  "international_expansion",
+  "competitors",
+  "personal_development",
+] as const;
