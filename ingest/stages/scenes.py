@@ -52,8 +52,9 @@ def _resize(jpg: Path) -> None:
 def _detect_scenes(video_path: Path, threshold: float) -> list[tuple]:
     """Run PySceneDetect with downscale + frame_skip for memory safety."""
     video = open_video(str(video_path))
-    video.set_downscale_factor(DOWNSCALE_FACTOR)
     sm = SceneManager()
+    sm.auto_downscale = False
+    sm.downscale = DOWNSCALE_FACTOR
     sm.add_detector(ContentDetector(threshold=threshold))
     sm.detect_scenes(video=video, frame_skip=FRAME_SKIP, show_progress=False)
     return sm.get_scene_list()
