@@ -24,6 +24,8 @@ export interface SearchOptions {
 
 const DEFAULT_K = 10;
 const MAX_K = 50;
+const DEDUPE_WINDOW_S = 30; // collapse overlapping moments from the same video within this window
+const OVERFETCH = 3; // request OVERFETCH × k from Qdrant so dedupe can still return k
 
 export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
   const k = Math.min(Math.max(1, opts.k ?? DEFAULT_K), MAX_K);
@@ -37,7 +39,7 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
 
   const points = await qdrant().query(COLLECTION_SEGMENTS, {
     query: queryVec,
-    limit: k,
+    limit: k * OVERFETCH,
     with_payload: true,
     filter,
   });
@@ -71,13 +73,13 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
     byPoint.set(String(row.point_id), row);
   }
 
-  const hits: SearchHit[] = [];
+  const all: SearchHit[] = [];
   for (const p of points.points) {
     const row = byPoint.get(String(p.id));
     if (!row) continue;
     const startS = Number(row.start_s);
     const videoUrl = String(row.url);
-    hits.push({
+    all.push({
       videoId: String(row.video_id),
       videoTitle: String(row.title ?? ""),
       videoUrl,
@@ -90,7 +92,24 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
       playUrl: appendTimestamp(videoUrl, startS),
     });
   }
-  return hits;
+
+  return dedupeByWindow(all, DEDUPE_WINDOW_S).slice(0, k);
+}
+
+function dedupeByWindow(hits: SearchHit[], windowS: number): SearchHit[] {
+  // Walk in rank order; suppress any hit whose midpoint is within windowS of
+  // a higher-ranked hit from the same video.
+  const kept: SearchHit[] = [];
+  for (const h of hits) {
+    const mid = (h.startS + h.endS) / 2;
+    const tooClose = kept.some(
+      (prev) =>
+        prev.videoId === h.videoId &&
+        Math.abs((prev.startS + prev.endS) / 2 - mid) < windowS,
+    );
+    if (!tooClose) kept.push(h);
+  }
+  return kept;
 }
 
 function appendTimestamp(url: string, t: number): string {
