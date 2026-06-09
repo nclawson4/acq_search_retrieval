@@ -69,7 +69,35 @@ Two tools are exposed:
 - `search_moments(query, k?, video_id?)` — ranked timestamped moments
 - `get_video(video_id)` — metadata and indexed counts for one video
 
-Add to Claude Desktop / Claude Code as a remote MCP server (Streamable HTTP). Set `MCP_TOKEN` in Vercel env vars to require `Authorization: Bearer <token>`.
+### Add it to Claude Desktop / Claude Code
+
+For clients that speak Streamable HTTP natively (Claude Code, recent Claude Desktop):
+
+```json
+{
+  "mcpServers": {
+    "long-form-video-search": {
+      "type": "streamableHttp",
+      "url": "https://acq-search-retrieval.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+For clients still on stdio-only, wrap the remote endpoint via the standard bridge:
+
+```json
+{
+  "mcpServers": {
+    "long-form-video-search": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://acq-search-retrieval.vercel.app/api/mcp"]
+    }
+  }
+}
+```
+
+Set `MCP_TOKEN` in Vercel env vars to require `Authorization: Bearer <token>`.
 
 ## Quickstart (local dev)
 

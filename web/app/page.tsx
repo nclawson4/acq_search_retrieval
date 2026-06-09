@@ -1,7 +1,16 @@
+import { sql } from "@/lib/db";
 import { APP_NAME } from "@/lib/env";
 import { searchMoments, type SearchHit } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
+
+const EXAMPLE_QUERIES = [
+  "the value equation",
+  "why pricing matters more than acquisition",
+  "how to think about partnerships",
+  "what makes a great offer",
+  "advice on raising prices",
+];
 
 function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
@@ -12,6 +21,27 @@ function fmtTime(seconds: number): string {
   return `${m}:${String(sec).padStart(2, "0")}`;
 }
 
+async function getCorpusStats() {
+  try {
+    const rows = (await sql()`
+      select
+        (select count(*) from videos) as videos,
+        (select count(*) from segments) as segments,
+        (select count(*) from frames) as frames,
+        (select coalesce(sum(duration_s), 0) from videos) as duration_s
+    `) as Array<{ videos: number; segments: number; frames: number; duration_s: number }>;
+    const r = rows[0];
+    return {
+      videos: Number(r.videos),
+      segments: Number(r.segments),
+      frames: Number(r.frames),
+      hours: Number(r.duration_s) / 3600,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -20,26 +50,37 @@ export default async function Home({
   const { q } = await searchParams;
   const query = (q ?? "").trim();
 
-  let hits: SearchHit[] = [];
-  let error: string | null = null;
-  if (query) {
-    try {
-      hits = await searchMoments({ query, k: 20 });
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Search failed";
-    }
-  }
+  const [hitsAndError, stats] = await Promise.all([
+    (async (): Promise<{ hits: SearchHit[]; error: string | null }> => {
+      if (!query) return { hits: [], error: null };
+      try {
+        return { hits: await searchMoments({ query, k: 20 }), error: null };
+      } catch (err) {
+        return {
+          hits: [],
+          error: err instanceof Error ? err.message : "Search failed",
+        };
+      }
+    })(),
+    getCorpusStats(),
+  ]);
+  const { hits, error } = hitsAndError;
 
   return (
     <main className="flex flex-col items-center w-full px-4 sm:px-6 py-10 sm:py-16">
       <div className="w-full max-w-3xl">
-        <header className="mb-8">
+        <header className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
           <p className="mt-2 text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
-            Find ranked, timestamped moments across the library. Try things like{" "}
-            <em>&ldquo;explaining the value equation&rdquo;</em> or{" "}
-            <em>&ldquo;why most businesses fail at pricing&rdquo;</em>.
+            Find ranked, timestamped moments across the library. Type what you remember of the
+            moment — it doesn&rsquo;t need to be exact.
           </p>
+          {stats && stats.videos > 0 && (
+            <p className="mt-3 text-xs text-zinc-500 tabular-nums">
+              Indexing {stats.videos} video{stats.videos === 1 ? "" : "s"} ·{" "}
+              {stats.hours.toFixed(1)} hours · {stats.segments} segments · {stats.frames} frames
+            </p>
+          )}
         </header>
 
         <form action="/" method="get" className="flex gap-2">
@@ -65,10 +106,23 @@ export default async function Home({
         )}
 
         {!query && !error && (
-          <p className="mt-10 text-sm text-zinc-500 dark:text-zinc-400">
-            Enter a query above to search. Each result links you to the exact moment in the
-            source video.
-          </p>
+          <div className="mt-10">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+              Try one of these:
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {EXAMPLE_QUERIES.map((eq) => (
+                <li key={eq}>
+                  <a
+                    href={`/?q=${encodeURIComponent(eq)}`}
+                    className="inline-block rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs hover:border-zinc-500 dark:hover:border-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
+                  >
+                    {eq}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {query && !error && hits.length === 0 && (
