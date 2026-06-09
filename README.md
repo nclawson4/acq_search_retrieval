@@ -2,8 +2,8 @@
 
 Multi-modal search and retrieval over a long-form video library. The same retrieval core is surfaced two ways:
 
-- A simple web search portal
-- A remote MCP server (Streamable HTTP) usable from any MCP-compatible client
+- **Web portal:** [acq-search-retrieval.vercel.app](https://acq-search-retrieval.vercel.app)
+- **Remote MCP server (Streamable HTTP):** `https://acq-search-retrieval.vercel.app/api/mcp`
 
 The intent is editor-grade sourcing: given a natural-language query, return ranked, timestamped moments that combine what was said (transcript) and what was on screen (visual).
 
@@ -11,61 +11,105 @@ The intent is editor-grade sourcing: given a natural-language query, return rank
 
 For every video in the corpus:
 
-- **Transcript segments** — Whisper word-level timestamps, windowed into ~30 s overlapping segments, embedded with `text-embedding-3-small`.
-- **Keyframes at scene changes** — extracted with PySceneDetect, embedded with open CLIP `ViT-L-14`.
+- **Transcript segments** — Whisper word-level timestamps, windowed into ~30 s overlapping segments snapped to sentence boundaries, embedded with OpenAI `text-embedding-3-small`.
+- **Keyframes at scene changes** — extracted with PySceneDetect, resized + JPEG-compressed, embedded with open CLIP `ViT-L-14` (LAION-2B), stored on Vercel Blob.
 
-At query time both indexes are searched. Results are merged and de-duplicated by time proximity.
+A text query embeds once and searches the segment index. Each result card shows the nearest keyframe to the matching moment, giving you the idea + the shot in one view. True cross-modal text-to-frame retrieval (e.g. *"him at the whiteboard"*) is a v2 add using CLIP's text encoder at query time.
 
 ## Why multi-modal
 
-Transcript search finds the idea. Frame search finds the shot. Thumbnail and B-roll work is a visual problem; transcript-only retrieval can't reach it. Audio (energy / tone) is a planned third modality.
+Transcript search finds the idea. Frame search finds the shot. Thumbnail and B-roll work is a visual problem; transcript-only retrieval can't reach it. Audio energy / tone is the planned third modality.
 
 ## Stack
 
 | Layer | Tool |
 | --- | --- |
-| Ingest | Python 3.12, yt-dlp, ffmpeg, scenedetect, OpenAI Whisper API, open-clip-torch |
-| Vector store | Qdrant Cloud |
+| Ingest | Python 3.12 · yt-dlp · ffmpeg · scenedetect · OpenAI Whisper API · open-clip-torch |
+| Vector store | Qdrant Cloud (`segments` + `frames` collections) |
 | Metadata store | Neon Postgres |
 | Object storage | Vercel Blob (frame thumbnails) |
-| Portal + MCP | Next.js 16 App Router on Vercel |
-| Rate limiting | Upstash Redis |
-| Eval | Golden queries → recall@k + MRR, rendered at `/eval` |
+| Portal + MCP | Next.js 16 App Router on Vercel (Fluid Compute) |
+| Rate limiting | Upstash Redis (`@upstash/ratelimit`) |
+| Eval | Golden queries + synthetic paraphrase eval, dashboard at `/eval` |
+
+Marketplace integrations (Neon, Upstash) and Vercel Blob are auto-provisioned; secrets stay out of the repo. GitHub secret scanning + push protection + gitleaks pre-commit + CI keep the public repo clean.
 
 ## Layout
 
 ```
 web/      Next.js portal + MCP HTTP endpoint
 ingest/   Python ingestion pipeline (CLI)
-eval/     Golden queries + retrieval eval runner
+eval/     Golden queries
 docs/     Architecture notes
+urls.txt  V1 video corpus
 ```
 
-## Quickstart
+## Using the MCP server
+
+Any MCP-compatible client can connect over Streamable HTTP. Quick `curl` smoke test:
+
+```bash
+# List tools
+curl -X POST https://acq-search-retrieval.vercel.app/api/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
+
+# Search
+curl -X POST https://acq-search-retrieval.vercel.app/api/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","method":"tools/call",
+       "params":{"name":"search_moments","arguments":{"query":"the value equation","k":5}},
+       "id":2}'
+```
+
+Two tools are exposed:
+
+- `search_moments(query, k?, video_id?)` — ranked timestamped moments
+- `get_video(video_id)` — metadata and indexed counts for one video
+
+Add to Claude Desktop / Claude Code as a remote MCP server (Streamable HTTP). Set `MCP_TOKEN` in Vercel env vars to require `Authorization: Bearer <token>`.
+
+## Quickstart (local dev)
 
 ```bash
 git clone https://github.com/nclawson4/acq_search_retrieval
 cd acq_search_retrieval
-cp .env.example .env  # fill in keys (see Env vars below)
+cp .env.example .env  # fill in keys
 
-# Ingest
+# One-time infra setup
 cd ingest
-python -m venv .venv && source .venv/bin/activate   # on Windows: .venv\Scripts\activate
+python -m venv .venv && source .venv/Scripts/activate   # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-python -m pipeline ../urls.txt
+python scripts/init_infra.py        # creates Postgres tables + Qdrant collections + payload indexes
+python scripts/smoke_test.py        # verifies OpenAI, Qdrant, Neon
 
-# Portal
+# Ingest the corpus
+python pipeline.py ../urls.txt      # idempotent on video_id; --force re-ingests
+
+# Run the portal
 cd ../web
 npm install
+vercel env pull .env.local --yes    # pulls Neon / Upstash / Blob from Vercel
 npm run dev
 ```
 
-The portal will be at `http://localhost:3000`. The MCP endpoint is at `http://localhost:3000/api/mcp`.
+## Running the eval
+
+```bash
+cd web
+npx tsx scripts/eval.ts             # synthetic eval over 30 paraphrased segments
+npx tsx scripts/eval.ts --n 100     # larger sample
+npx tsx scripts/eval.ts --golden    # only curated queries from eval/golden_queries.yaml
+```
+
+Writes a report to `web/public/eval-latest.json`. The `/eval` page renders it.
 
 ## Env vars
 
-See `.env.example` for the full list. Required for ingest: `OPENAI_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY`, `DATABASE_URL`. Required for the portal: same set plus `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `BLOB_READ_WRITE_TOKEN`.
+See `.env.example`. Required for ingest: `OPENAI_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY`, `DATABASE_URL`. Required for the portal additionally: `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `BLOB_READ_WRITE_TOKEN`. All Marketplace-provisioned vars come from `vercel env pull .env.local --yes`.
 
 ## License
 
-MIT (planned).
+MIT.
