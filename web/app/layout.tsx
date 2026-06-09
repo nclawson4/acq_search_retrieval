@@ -13,10 +13,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Search ranked, timestamped moments inside long-form videos by what was said and what was on screen. Surfaced as a web portal and a remote MCP server.";
+
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description:
-    "Search ranked, timestamped moments inside long-form videos by what was said and what was on screen.",
+  metadataBase: new URL("https://acq-search-retrieval.vercel.app"),
+  title: { default: APP_NAME, template: `%s — ${APP_NAME}` },
+  description: DESCRIPTION,
+  openGraph: {
+    title: APP_NAME,
+    description: DESCRIPTION,
+    type: "website",
+    url: "/",
+    siteName: APP_NAME,
+  },
+  twitter: {
+    card: "summary",
+    title: APP_NAME,
+    description: DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sql } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const rows = (await sql()`
+      select title from videos where id = ${id} limit 1
+    `) as Array<{ title: string | null }>;
+    const title = rows[0]?.title || id;
+    return { title };
+  } catch {
+    return {};
+  }
+}
 
 function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
