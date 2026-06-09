@@ -1,0 +1,19 @@
+# Core runtime
+python-dotenv>=1.0.1
+psycopg[binary]>=3.2.3
+qdrant-client>=1.12.0
+openai>=1.54.0
+
+# Ingest pipeline
+yt-dlp>=2024.11.4
+scenedetect[opencv]>=0.6.4
+ffmpeg-python>=0.2.0
+Pillow>=10.4.0
+numpy>=1.26.0
+
+# Open CLIP for frame embeddings
+torch>=2.4.0
+open-clip-torch>=2.30.0
+
+# HTTP for Vercel Blob upload
+httpx>=0.27.0
