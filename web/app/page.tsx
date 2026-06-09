@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db";
-import { APP_NAME } from "@/lib/env";
+import { APP_NAME, SCORE_FLOOR } from "@/lib/env";
 import { searchMoments, type SearchHit } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +65,8 @@ export default async function Home({
     getCorpusStats(),
   ]);
   const { hits, error } = hitsAndError;
+  const strongHits = hits.filter((h) => h.score >= SCORE_FLOOR);
+  const weakHidden = hits.length - strongHits.length;
 
   return (
     <main className="flex flex-col items-center w-full px-4 sm:px-6 py-10 sm:py-16">
@@ -127,15 +129,24 @@ export default async function Home({
           </div>
         )}
 
-        {query && !error && hits.length === 0 && (
+        {query && !error && strongHits.length === 0 && (
           <p className="mt-10 text-sm text-zinc-500 dark:text-zinc-400">
-            No matches for <strong>&ldquo;{query}&rdquo;</strong>. Try rephrasing or describing the
-            moment more directly.
+            No strong matches for <strong>&ldquo;{query}&rdquo;</strong>. Try rephrasing or
+            describing the moment more directly.
+            {weakHidden > 0 && (
+              <>
+                {" "}
+                <span className="text-zinc-400">
+                  ({weakHidden} weak match{weakHidden === 1 ? "" : "es"} hidden below score{" "}
+                  {SCORE_FLOOR.toFixed(2)}.)
+                </span>
+              </>
+            )}
           </p>
         )}
 
         <ul className="mt-8 space-y-4">
-          {hits.map((hit, i) => (
+          {strongHits.map((hit, i) => (
             <li
               key={`${hit.videoId}-${hit.startS}-${i}`}
               className="group flex flex-col sm:flex-row gap-4 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition relative focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100"
@@ -190,6 +201,13 @@ export default async function Home({
             </li>
           ))}
         </ul>
+
+        {strongHits.length > 0 && weakHidden > 0 && (
+          <p className="mt-6 text-xs text-zinc-500">
+            {weakHidden} weaker match{weakHidden === 1 ? "" : "es"} hidden (score &lt;{" "}
+            {SCORE_FLOOR.toFixed(2)}).
+          </p>
+        )}
 
         <footer className="mt-16 text-xs text-zinc-500 dark:text-zinc-500">
           Multi-modal retrieval over a long-form video library. Transcript embeddings power text

@@ -1,6 +1,7 @@
 import { sql } from "./db";
 import { embedQuery } from "./embed";
 import { COLLECTION_SEGMENTS } from "./env";
+import { hypotheticalAnswer } from "./hyde";
 import { qdrant } from "./qdrant";
 
 export interface SearchHit {
@@ -24,14 +25,23 @@ export interface SearchOptions {
 
 const DEFAULT_K = 10;
 const MAX_K = 50;
-const DEDUPE_WINDOW_S = 30; // collapse overlapping moments from the same video within this window
+const DEDUPE_WINDOW_S = 15; // collapse overlapping moments from the same video within this window
 const OVERFETCH = 3; // request OVERFETCH × k from Qdrant so dedupe can still return k
 
 export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
   const k = Math.min(Math.max(1, opts.k ?? DEFAULT_K), MAX_K);
   if (!opts.query || !opts.query.trim()) return [];
 
-  const queryVec = await embedQuery(opts.query.trim());
+  // HyDE: rewrite the user query into a hypothetical spoken-style answer before
+  // embedding. Closes the vocab gap between conversational speech and the way
+  // people phrase questions. Falls back to the raw query if the rewrite fails.
+  let embedTarget = opts.query.trim();
+  try {
+    embedTarget = await hypotheticalAnswer(opts.query.trim());
+  } catch {
+    // keep raw query
+  }
+  const queryVec = await embedQuery(embedTarget);
 
   const filter = opts.videoId
     ? { must: [{ key: "video_id", match: { value: opts.videoId } }] }

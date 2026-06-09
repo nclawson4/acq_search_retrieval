@@ -1,7 +1,7 @@
 """Window word-level transcripts into search segments.
 
-Targets ~30 s windows with 5 s overlap, snapped to nearest sentence boundary
-(. ? !) within ±5 s of the target end. Returns text + start/end seconds.
+Targets ~15 s windows with 5 s overlap, snapped to nearest sentence boundary
+(. ? !) within ±3 s of the target end. Returns text + start/end seconds.
 """
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from dataclasses import dataclass
 
 from stages.transcribe import Word
 
-WINDOW_S = 30.0
+WINDOW_S = 15.0
 OVERLAP_S = 5.0
-BOUNDARY_TOLERANCE_S = 5.0
+BOUNDARY_TOLERANCE_S = 3.0
 SENTENCE_END_CHARS = ".?!"
 
 

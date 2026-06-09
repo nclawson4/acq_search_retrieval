@@ -24,3 +24,5 @@ export const MCP_TOKEN = process.env.MCP_TOKEN ?? "";
 export const COLLECTION_SEGMENTS = "segments";
 export const COLLECTION_FRAMES = "frames";
 export const TEXT_EMBED_MODEL = "text-embedding-3-small";
+export const HYDE_MODEL = "gpt-4o-mini";
+export const SCORE_FLOOR = 0.35;
