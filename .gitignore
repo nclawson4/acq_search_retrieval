@@ -74,6 +74,9 @@ Thumbs.db
 *.log
 logs/
 
+# Claude Code session artifacts
+.claude/
+
 # Python virtualenv tooling
 pip-log.txt
 pip-delete-this-directory.txt

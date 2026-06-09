@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
 
 from config import (
     CLIP_DIM,
@@ -43,4 +43,18 @@ def ensure_collections() -> dict[str, str]:
         )
         status[QDRANT_COLLECTION_FRAMES] = "created"
 
+    _ensure_payload_index(c, QDRANT_COLLECTION_SEGMENTS, "video_id")
+    _ensure_payload_index(c, QDRANT_COLLECTION_FRAMES, "video_id")
+
     return status
+
+
+def _ensure_payload_index(c: QdrantClient, collection: str, field: str) -> None:
+    """Create a keyword payload index on `field` if it doesn't already exist."""
+    info = c.get_collection(collection)
+    schema = info.payload_schema or {}
+    if field in schema:
+        return
+    c.create_payload_index(
+        collection_name=collection, field_name=field, field_schema=PayloadSchemaType.KEYWORD
+    )
