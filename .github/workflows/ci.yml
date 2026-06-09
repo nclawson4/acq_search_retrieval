@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        if: hashFiles('web/package.json') != ''
+      - name: Lint
+        run: npm run lint --if-present
+        if: hashFiles('web/package.json') != ''
+      - name: Typecheck
+        run: npm run type-check --if-present
+        if: hashFiles('web/package.json') != ''
+
+  ingest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ingest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: ingest/requirements.txt
+      - name: Install
+        run: pip install -r requirements.txt
+        if: hashFiles('ingest/requirements.txt') != ''
+      - name: Syntax check
+        run: python -m compileall -q .
+        if: hashFiles('ingest/requirements.txt') != ''

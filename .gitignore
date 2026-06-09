@@ -1,0 +1,84 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.npm/
+.pnpm-store/
+
+# Vercel
+.vercel/
+
+# Ingest artifacts — raw media must not be committed
+media/
+*.mp4
+*.m4a
+*.mp3
+*.wav
+*.webm
+*.mkv
+*.opus
+
+# Frames extracted during ingest
+ingest/frames/
+frames/
+
+# Image files in source dirs (allow docs/screenshots)
+ingest/**/*.jpg
+ingest/**/*.jpeg
+ingest/**/*.png
+web/public/uploads/
+
+# Model weights / large binaries
+*.bin
+*.pt
+*.safetensors
+*.ckpt
+*.onnx
+*.gguf
+
+# Ingest cache + intermediate JSON
+ingest/cache/
+ingest/transcripts/
+ingest/scenes/
+
+# Eval — allow committed results, ignore scratch
+eval/results/scratch/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Python virtualenv tooling
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
