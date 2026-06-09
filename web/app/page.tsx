@@ -70,7 +70,9 @@ export default async function Home({
     <main className="flex flex-col items-center w-full px-4 sm:px-6 py-10 sm:py-16">
       <div className="w-full max-w-3xl">
         <header className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{APP_NAME}</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            <a href="/" className="hover:opacity-80 transition">{APP_NAME}</a>
+          </h1>
           <p className="mt-2 text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
             Find ranked, timestamped moments across the library. Type what you remember of the
             moment — it doesn&rsquo;t need to be exact.
@@ -136,8 +138,16 @@ export default async function Home({
           {hits.map((hit, i) => (
             <li
               key={`${hit.videoId}-${hit.startS}-${i}`}
-              className="flex flex-col sm:flex-row gap-4 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:border-zinc-400 dark:hover:border-zinc-600 transition"
+              className="group flex flex-col sm:flex-row gap-4 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition relative focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100"
             >
+              <a
+                href={hit.playUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 z-0"
+                aria-label={`Play ${hit.videoTitle || hit.videoId} at ${fmtTime(hit.startS)}`}
+              />
+              <div className="relative z-10 pointer-events-none contents">
               {hit.frameUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -162,17 +172,13 @@ export default async function Home({
                   {hit.text}
                 </p>
                 <div className="mt-2 flex items-center gap-3 text-xs">
-                  <a
-                    href={hit.playUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-zinc-900 dark:text-zinc-100 underline underline-offset-2 hover:no-underline"
-                  >
-                    Play at {fmtTime(hit.startS)}
-                  </a>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:underline underline-offset-2">
+                    Play at {fmtTime(hit.startS)} →
+                  </span>
                   <span className="text-zinc-400">·</span>
                   <span className="text-zinc-500">score {hit.score.toFixed(3)}</span>
                 </div>
+              </div>
               </div>
             </li>
           ))}
