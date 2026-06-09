@@ -179,7 +179,6 @@ export default async function Home({
                   <a
                     href={`/v/${hit.videoId}`}
                     className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline-offset-2 hover:underline relative z-20 pointer-events-auto"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     all moments
                   </a>
