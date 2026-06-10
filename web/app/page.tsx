@@ -71,7 +71,7 @@ export default async function Home({
     (async (): Promise<{ hits: SearchHit[]; error: string | null }> => {
       if (!query) return { hits: [], error: null };
       try {
-        const hits = await searchMoments({
+        const { hits } = await searchMoments({
           query,
           k: 20,
           speaker,

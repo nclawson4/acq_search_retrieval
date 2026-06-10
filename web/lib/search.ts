@@ -2,7 +2,7 @@ import { sql } from "./db";
 import { embedQuery } from "./embed";
 import { COLLECTION_MOMENTS } from "./env";
 import { hypotheticalAnswer } from "./hyde";
-import { extractIntent } from "./intent";
+import { extractIntent, type QueryIntent } from "./intent";
 import { qdrant } from "./qdrant";
 
 export type SpeakerMode = "answer" | "question" | "both";
@@ -47,11 +47,20 @@ export interface SearchOptions {
 
 const DEFAULT_K = 10;
 const MAX_K = 50;
-const OVERFETCH = 4;
+// Overfetch because industry is filtered in TS as a substring match (the
+// stored value is the free-form phrase the attendee used, e.g. "direct
+// response e-commerce", so Qdrant exact-match `any` would miss it).
+const OVERFETCH = 8;
 
-export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
+export interface SearchResult {
+  hits: SearchHit[];
+  intent: QueryIntent;
+}
+
+export async function searchMoments(opts: SearchOptions): Promise<SearchResult> {
   const k = Math.min(Math.max(1, opts.k ?? DEFAULT_K), MAX_K);
-  if (!opts.query || !opts.query.trim()) return [];
+  const emptyIntent: QueryIntent = { industries: [], problems: [], revenueBand: null };
+  if (!opts.query || !opts.query.trim()) return { hits: [], intent: emptyIntent };
   const speaker = opts.speaker ?? "answer";
 
   // In parallel: HyDE-expand the query for embedding, and extract structured
@@ -60,24 +69,18 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
   const rawQuery = opts.query.trim();
   const [embedTarget, intent] = await Promise.all([
     hypotheticalAnswer(rawQuery).catch(() => rawQuery),
-    extractIntent(rawQuery).catch(() => ({
-      industries: [] as string[],
-      problems: [] as string[],
-      revenueBand: null as string | null,
-    })),
+    extractIntent(rawQuery).catch(() => emptyIntent),
   ]);
   const queryVec = await embedQuery(embedTarget);
 
-  // Qdrant filter: video, speaker side, attendee context, audio quality floor.
-  // Explicit caller-provided filters always win over auto-extracted intent.
+  // Qdrant filter: video, speaker side, revenue band, problems, audio quality.
+  // Industry is NOT filtered here — the stored value is a free-form phrase the
+  // attendee used (e.g. "direct response e-commerce"), so Qdrant exact-match
+  // would miss most candidates. Industry is applied as a substring filter
+  // after we have the moment rows from Postgres.
   const must: Array<Record<string, unknown>> = [];
   if (opts.videoId) must.push({ key: "video_id", match: { value: opts.videoId } });
   if (speaker !== "both") must.push({ key: "kind", match: { value: speaker } });
-  if (opts.industry) {
-    must.push({ key: "industry", match: { value: opts.industry } });
-  } else if (intent.industries.length > 0) {
-    must.push({ key: "industry", match: { any: intent.industries } });
-  }
   if (opts.revenueBand) {
     must.push({ key: "revenue_band", match: { value: opts.revenueBand } });
   } else if (intent.revenueBand) {
@@ -99,7 +102,7 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
     with_payload: true,
     filter,
   });
-  if (!points.points.length) return [];
+  if (!points.points.length) return { hits: [], intent };
 
   // We need the Q + A text for whichever Qdrant point matched. Each point has
   // a payload.pair_qdrant_id pointing at the OTHER side of the same moment.
@@ -135,7 +138,14 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
   }
 
   // Walk hits in score order. Dedupe by moment id so a single moment doesn't
-  // appear twice when speaker="both" surfaces both sides.
+  // appear twice when speaker="both" surfaces both sides. If the caller passed
+  // an explicit industry, exact-match; otherwise apply intent.industries as a
+  // case-insensitive substring filter so "e-commerce" matches the indexed
+  // "direct response e-commerce".
+  const explicitIndustry = opts.industry?.toLowerCase().trim() ?? null;
+  const intentTokens = intent.industries
+    .map((s) => s.toLowerCase().trim())
+    .filter(Boolean);
   const seenMomentIds = new Set<string>();
   const hits: SearchHit[] = [];
   for (const p of points.points) {
@@ -144,6 +154,14 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
     const momentId = String(row.id);
     if (seenMomentIds.has(momentId)) continue;
     seenMomentIds.add(momentId);
+
+    const industryRaw = row.industry ? String(row.industry).toLowerCase() : "";
+    if (explicitIndustry) {
+      if (industryRaw !== explicitIndustry) continue;
+    } else if (intentTokens.length > 0) {
+      const hit = intentTokens.some((t) => industryRaw.includes(t));
+      if (!hit) continue;
+    }
 
     const qStartS = Number(row.q_start_s);
     const aStartS = Number(row.a_start_s);
@@ -179,7 +197,7 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
     });
     if (hits.length >= k) break;
   }
-  return hits;
+  return { hits, intent };
 }
 
 function appendTimestamp(url: string, t: number): string {

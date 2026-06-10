@@ -57,7 +57,7 @@ async function buildServer(): Promise<McpServer> {
       },
     },
     async ({ query, k, video_id, speaker, industry, revenue_band, problems, min_audio_quality }) => {
-      const hits = await searchMoments({
+      const { hits } = await searchMoments({
         query,
         k,
         videoId: video_id,

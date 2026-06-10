@@ -125,7 +125,7 @@ async function evalQuery(
   source: "golden" | "synthetic",
   k: number,
 ): Promise<QueryEvalResult> {
-  const hits = await searchMoments({ query: q.query, k });
+  const { hits } = await searchMoments({ query: q.query, k });
   let rank: number | null = null;
   for (let i = 0; i < hits.length; i++) {
     if (q.expected.some((e) => isHit(e, hits[i]))) {
