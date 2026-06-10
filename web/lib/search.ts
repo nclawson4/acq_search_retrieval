@@ -2,6 +2,7 @@ import { sql } from "./db";
 import { embedQuery } from "./embed";
 import { COLLECTION_MOMENTS } from "./env";
 import { hypotheticalAnswer } from "./hyde";
+import { extractIntent } from "./intent";
 import { qdrant } from "./qdrant";
 
 export type SpeakerMode = "answer" | "question" | "both";
@@ -53,23 +54,39 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchHit[]> {
   if (!opts.query || !opts.query.trim()) return [];
   const speaker = opts.speaker ?? "answer";
 
-  // HyDE: rewrite the query into a hypothetical spoken answer before embedding.
-  let embedTarget = opts.query.trim();
-  try {
-    embedTarget = await hypotheticalAnswer(opts.query.trim());
-  } catch {
-    // keep raw query
-  }
+  // In parallel: HyDE-expand the query for embedding, and extract structured
+  // filter intent (industry / problems / revenue band) so a single text input
+  // automatically benefits from the structured fields ingest already populated.
+  const rawQuery = opts.query.trim();
+  const [embedTarget, intent] = await Promise.all([
+    hypotheticalAnswer(rawQuery).catch(() => rawQuery),
+    extractIntent(rawQuery).catch(() => ({
+      industries: [] as string[],
+      problems: [] as string[],
+      revenueBand: null as string | null,
+    })),
+  ]);
   const queryVec = await embedQuery(embedTarget);
 
   // Qdrant filter: video, speaker side, attendee context, audio quality floor.
+  // Explicit caller-provided filters always win over auto-extracted intent.
   const must: Array<Record<string, unknown>> = [];
   if (opts.videoId) must.push({ key: "video_id", match: { value: opts.videoId } });
   if (speaker !== "both") must.push({ key: "kind", match: { value: speaker } });
-  if (opts.industry) must.push({ key: "industry", match: { value: opts.industry } });
-  if (opts.revenueBand) must.push({ key: "revenue_band", match: { value: opts.revenueBand } });
+  if (opts.industry) {
+    must.push({ key: "industry", match: { value: opts.industry } });
+  } else if (intent.industries.length > 0) {
+    must.push({ key: "industry", match: { any: intent.industries } });
+  }
+  if (opts.revenueBand) {
+    must.push({ key: "revenue_band", match: { value: opts.revenueBand } });
+  } else if (intent.revenueBand) {
+    must.push({ key: "revenue_band", match: { value: intent.revenueBand } });
+  }
   if (opts.problems && opts.problems.length > 0) {
     must.push({ key: "problems", match: { any: opts.problems } });
+  } else if (intent.problems.length > 0) {
+    must.push({ key: "problems", match: { any: intent.problems } });
   }
   if (opts.minAudioQuality && opts.minAudioQuality > 0) {
     must.push({ key: "audio_quality", range: { gte: opts.minAudioQuality } });
