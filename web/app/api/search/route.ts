@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const { hits, intent } = await searchMoments({
+    const { hits } = await searchMoments({
       query,
       k,
       videoId,
@@ -39,10 +39,7 @@ export async function GET(req: Request) {
       problems,
       minAudioQuality,
     });
-    return NextResponse.json(
-      { query, hits, intent },
-      { headers: { "cache-control": "no-store" } },
-    );
+    return NextResponse.json({ query, hits }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "search failed";
     return NextResponse.json({ error: message }, { status: 500 });
