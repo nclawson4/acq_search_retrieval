@@ -58,7 +58,7 @@ export default async function Home({
 }) {
   const sp = await searchParams;
   const query = (sp.q ?? "").trim();
-  const speaker: SpeakerMode = (sp.speaker as SpeakerMode) || "answer";
+  const speaker: SpeakerMode = (sp.speaker as SpeakerMode) || "both";
   const industry = (sp.industry ?? "").trim() || undefined;
   const revenue = (sp.revenue ?? "").trim() || undefined;
   const problemsList = (sp.problems ?? "")

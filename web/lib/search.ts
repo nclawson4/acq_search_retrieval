@@ -1,7 +1,6 @@
 import { sql } from "./db";
 import { embedQuery } from "./embed";
 import { COLLECTION_MOMENTS } from "./env";
-import { hypotheticalAnswer } from "./hyde";
 import { qdrant } from "./qdrant";
 
 export type SpeakerMode = "answer" | "question" | "both";
@@ -60,9 +59,13 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchResult> 
   // Alex's reply, so single-sided answer-only matching misses it.
   const speaker = opts.speaker ?? "both";
 
-  const rawQuery = opts.query.trim();
-  const embedTarget = await hypotheticalAnswer(rawQuery).catch(() => rawQuery);
-  const queryVec = await embedQuery(embedTarget);
+  // Embed the raw query directly. We used to expand it via HyDE into a
+  // hypothetical "podcast-style answer" before embedding, which boosted
+  // answer-side matches but pushed persona / industry intent out of the
+  // vector — and persona text lives in the attendee question side, so
+  // queries like "ecommerce founder" or "healthcare founder" couldn't
+  // surface the right moments. Symmetric raw embedding lets either side win.
+  const queryVec = await embedQuery(opts.query.trim());
 
   // Only structured filters explicitly passed by the caller (or required
   // invariants like video_id / speaker side) get applied. Free-text intent
