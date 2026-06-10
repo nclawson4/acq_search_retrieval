@@ -1,26 +1,41 @@
-"""LLM diarization of a workshop Q&A transcript.
+"""Map Deepgram speaker clusters onto attendee / alex roles.
 
-The corpus is consistent: an attendee asks Alex Hormozi a question at a
-workshop and Alex answers. We don't need a full diarization model; one
-LLM pass labels each sentence as `attendee` or `alex` reliably for this
-two-speaker format.
+Deepgram tags each word with an anonymous speaker integer. We:
+  1. Collapse consecutive same-speaker words into raw turns.
+  2. Decide which integer is Alex by comparing each cluster's audio
+     against a reference clip of Alex (Resemblyzer voice embedding).
+     If no reference clip is configured we fall back to a single LLM
+     call that reads each cluster's concatenated text.
+  3. Emit Turn objects keyed by `attendee` / `alex` (every non-Alex
+     speaker becomes `attendee` — works for the workshop Q&A format
+     even when several different attendees ask questions in one video).
 
-Output is a list of Turn objects (consecutive same-speaker sentences
-merged into one turn) with start/end times pulled from the word stream.
+The downstream `pair` stage consumes the resulting Turn list unchanged.
 """
 from __future__ import annotations
 
 import json
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
+import librosa
+import numpy as np
 from openai import OpenAI
 
-from config import CHAT_MODEL, OPENAI_API_KEY
+from config import ALEX_REFERENCE_AUDIO, CHAT_MODEL, OPENAI_API_KEY
 from stages.transcribe import TranscriptResult, Word
 
 Speaker = Literal["attendee", "alex"]
+
+# Resemblyzer wants 16 kHz mono. Our pipeline already downloads audio at 16 kHz mono.
+TARGET_SR = 16_000
+# A cluster needs at least this much voiced audio to get a reliable embedding.
+MIN_CLUSTER_AUDIO_S = 5.0
+# Cosine-similarity floor for the "this cluster is Alex" decision. Below this
+# we treat the voice match as inconclusive and fall back to the LLM heuristic.
+VOICE_MATCH_FLOOR = 0.55
 
 
 @dataclass
@@ -32,141 +47,191 @@ class Turn:
 
 
 @dataclass
-class _Sentence:
+class _RawTurn:
+    speaker_id: int
     start_s: float
     end_s: float
-    text: str
+    words: list[Word]
+
+    @property
+    def text(self) -> str:
+        return _stitch(self.words)
+
+    @property
+    def duration_s(self) -> float:
+        return max(0.0, self.end_s - self.start_s)
 
 
-SENTENCE_END = re.compile(r"[.?!](?:\s|$)")
-SYSTEM = (
-    "You label sentences from a transcript of an Alex Hormozi business "
-    "workshop. The format is always two speakers: an audience attendee at a "
-    "microphone asks a question (often sharing their business context — "
-    "industry, revenue, problem), then Alex Hormozi answers. Label each "
-    'sentence with one of two values: "attendee" or "alex". When Alex '
-    'briefly interjects a clarifying question, label that as "alex".\n\n'
-    "INPUT: A numbered list of N sentences.\n"
-    'OUTPUT: Compact JSON only: {"labels":["attendee","alex",...]}\n'
-    "The labels array MUST have exactly N elements in the same order as the "
-    "input. Do NOT echo the sentences. Do NOT include any other keys. Do NOT "
-    "wrap in markdown."
-)
-SENTENCE_CHUNK = 40  # diarize this many sentences per LLM call
-
-
-def _build_sentences(text: str, words: list[Word]) -> list[_Sentence]:
-    """Whisper's per-word output has no punctuation; only `text` does. Split the
-    punctuated text into sentences, then re-attach timestamps by walking the
-    word stream and consuming N words per sentence (where N = word count in
-    that sentence's text). Robust to minor token mismatch between the two.
-    """
-    if not text.strip() or not words:
-        return []
-    raw_sentences = [s.strip() for s in re.split(r"(?<=[.?!])\s+", text.strip()) if s.strip()]
-    sentences: list[_Sentence] = []
-    idx = 0
-    for raw in raw_sentences:
-        n = len(raw.split())
-        if idx >= len(words) or n <= 0:
-            break
-        end_idx = min(len(words), idx + n)
-        chunk = words[idx:end_idx]
-        if not chunk:
-            break
-        sentences.append(_Sentence(start_s=chunk[0].start, end_s=chunk[-1].end, text=raw))
-        idx = end_idx
-    # If words remained (rare), attach them to the last sentence.
-    if sentences and idx < len(words):
-        last = sentences[-1]
-        sentences[-1] = _Sentence(start_s=last.start_s, end_s=words[-1].end, text=last.text)
-    return sentences
-
-
-def _label_chunk(client: OpenAI, sentences: list[_Sentence]) -> list[Speaker]:
-    """One LLM call labeling up to SENTENCE_CHUNK sentences."""
-    if not sentences:
-        return []
-    numbered = "\n".join(f"{i + 1}. {s.text}" for i, s in enumerate(sentences))
-    user = f"Label exactly {len(sentences)} sentences.\n\n{numbered}"
-    # Conservative cap: each label is ~12 chars wire, +JSON overhead. 30 tokens/label is generous.
-    resp = client.chat.completions.create(
-        model=CHAT_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM},
-            {"role": "user", "content": user},
-        ],
-        response_format={"type": "json_object"},
-        temperature=0.0,
-        max_tokens=max(200, len(sentences) * 8 + 100),
-    )
-    raw = resp.choices[0].message.content or "{}"
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        # Model went off the rails — return all "alex" so this chunk produces no
-        # Q→A pairs, rather than failing the whole video.
-        return ["alex"] * len(sentences)
-    labels = data.get("labels") or []
-    out: list[Speaker] = []
-    for lbl in labels[: len(sentences)]:
-        s = str(lbl).strip().lower()
-        out.append("attendee" if s.startswith("att") else "alex")
-    # Pad if short.
-    while len(out) < len(sentences):
-        out.append("alex")
-    return out
-
-
-def _label_sentences(sentences: list[_Sentence]) -> list[Speaker]:
-    """Chunked LLM calls. Smaller chunks keep the output bounded and reliable."""
-    if not sentences:
-        return []
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    out: list[Speaker] = []
-    for i in range(0, len(sentences), SENTENCE_CHUNK):
-        chunk = sentences[i : i + SENTENCE_CHUNK]
-        out.extend(_label_chunk(client, chunk))
-    return out
-
-
-def diarize(trans: TranscriptResult) -> list[Turn]:
-    """Group word-level transcript into speaker-labeled turns."""
-    sentences = _build_sentences(trans.text, trans.words)
-    if not sentences:
-        return []
-    labels = _label_sentences(sentences)
-
-    turns: list[Turn] = []
-    cur_speaker: Speaker | None = None
-    cur_start = 0.0
-    cur_end = 0.0
-    cur_parts: list[str] = []
-    for s, lbl in zip(sentences, labels):
-        if lbl == cur_speaker:
-            cur_end = s.end_s
-            cur_parts.append(s.text)
+def _stitch(words: list[Word]) -> str:
+    """Join punctuated word tokens with spaces, but don't pad before
+    closing punctuation that Deepgram smart-formatted onto the word itself."""
+    parts: list[str] = []
+    for w in words:
+        if not w.word:
+            continue
+        if parts and re.match(r"^[.,!?;:%')\]}]", w.word):
+            parts[-1] = parts[-1] + w.word
         else:
-            if cur_speaker is not None and cur_parts:
-                turns.append(
-                    Turn(
-                        speaker=cur_speaker,
-                        start_s=cur_start,
-                        end_s=cur_end,
-                        text=" ".join(cur_parts),
-                    )
-                )
-            cur_speaker = lbl
-            cur_start = s.start_s
-            cur_end = s.end_s
-            cur_parts = [s.text]
-    if cur_speaker is not None and cur_parts:
-        turns.append(
+            parts.append(w.word)
+    return " ".join(parts).strip()
+
+
+def _group_words(words: list[Word]) -> list[_RawTurn]:
+    turns: list[_RawTurn] = []
+    cur: _RawTurn | None = None
+    for w in words:
+        if cur is None or w.speaker != cur.speaker_id:
+            if cur is not None:
+                turns.append(cur)
+            cur = _RawTurn(speaker_id=w.speaker, start_s=w.start, end_s=w.end, words=[w])
+        else:
+            cur.end_s = w.end
+            cur.words.append(w)
+    if cur is not None:
+        turns.append(cur)
+    return turns
+
+
+def _load_audio_mono(path: Path) -> tuple[np.ndarray, int]:
+    audio, sr = librosa.load(path, sr=TARGET_SR, mono=True)
+    return audio.astype(np.float32), sr
+
+
+def _cluster_audio(audio: np.ndarray, sr: int, turns: list[_RawTurn], speaker_id: int) -> np.ndarray:
+    chunks: list[np.ndarray] = []
+    total_s = 0.0
+    for t in turns:
+        if t.speaker_id != speaker_id:
+            continue
+        i0 = max(0, int(t.start_s * sr))
+        i1 = min(len(audio), int(t.end_s * sr))
+        if i1 <= i0:
+            continue
+        chunks.append(audio[i0:i1])
+        total_s += (i1 - i0) / sr
+        if total_s >= 60.0:
+            # Plenty of speech for a stable embedding; stop accumulating.
+            break
+    if not chunks:
+        return np.zeros(0, dtype=np.float32)
+    return np.concatenate(chunks)
+
+
+def _resolve_alex_via_voice(
+    raw_turns: list[_RawTurn], audio_path: Path, ref_path: Path
+) -> int | None:
+    """Return the speaker_id whose voice best matches the reference clip,
+    or None if Resemblyzer can't decide (inconclusive similarity or missing
+    audio for every cluster)."""
+    try:
+        from resemblyzer import VoiceEncoder, preprocess_wav
+    except ImportError:
+        return None
+
+    audio, sr = _load_audio_mono(audio_path)
+    encoder = VoiceEncoder(verbose=False)
+
+    ref_wav = preprocess_wav(ref_path)
+    ref_emb = encoder.embed_utterance(ref_wav)
+
+    speaker_ids = sorted({t.speaker_id for t in raw_turns})
+    best_id: int | None = None
+    best_sim = -1.0
+    for sid in speaker_ids:
+        clip = _cluster_audio(audio, sr, raw_turns, sid)
+        if clip.size / sr < MIN_CLUSTER_AUDIO_S:
+            continue
+        wav = preprocess_wav(clip, source_sr=sr)
+        emb = encoder.embed_utterance(wav)
+        sim = float(np.dot(ref_emb, emb) / (np.linalg.norm(ref_emb) * np.linalg.norm(emb) + 1e-9))
+        if sim > best_sim:
+            best_sim = sim
+            best_id = sid
+    if best_id is None or best_sim < VOICE_MATCH_FLOOR:
+        return None
+    return best_id
+
+
+def _resolve_alex_via_llm(raw_turns: list[_RawTurn]) -> int | None:
+    """Fallback: feed the first few hundred chars of each cluster's text to
+    a small LLM and ask which one is Alex Hormozi."""
+    speaker_ids = sorted({t.speaker_id for t in raw_turns})
+    if len(speaker_ids) < 2:
+        return speaker_ids[0] if speaker_ids else None
+
+    samples: dict[int, str] = {}
+    for sid in speaker_ids:
+        joined = " ".join(t.text for t in raw_turns if t.speaker_id == sid)
+        samples[sid] = joined[:1200]
+
+    system = (
+        "You are looking at an Alex Hormozi workshop transcript already "
+        "split by speaker cluster. Identify which cluster is Alex. "
+        "Alex tends to ask diagnostic questions ('what's stopping you?', "
+        "'how much are you doing?'), give direct advice using business "
+        "frameworks, and reference his own companies. Attendees describe "
+        "their business: industry, revenue, problem.\n\n"
+        'Output JSON only: {"alex_speaker_id": <int>}'
+    )
+    user_lines = [f"speaker {sid}:\n{txt}\n" for sid, txt in samples.items()]
+    user = "\n".join(user_lines)
+    try:
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        resp = client.chat.completions.create(
+            model=CHAT_MODEL,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.0,
+            max_tokens=40,
+        )
+        data = json.loads(resp.choices[0].message.content or "{}")
+        sid = data.get("alex_speaker_id")
+        if isinstance(sid, int) and sid in speaker_ids:
+            return sid
+    except Exception:
+        return None
+    return None
+
+
+def _resolve_alex(raw_turns: list[_RawTurn], audio_path: Path) -> int | None:
+    """Decide which speaker_id is Alex. Returns None if undecidable."""
+    speaker_ids = sorted({t.speaker_id for t in raw_turns})
+    if len(speaker_ids) == 0:
+        return None
+    if len(speaker_ids) == 1:
+        # Single cluster — voice match would be circular, just call it Alex.
+        return speaker_ids[0]
+
+    if ALEX_REFERENCE_AUDIO:
+        ref = Path(ALEX_REFERENCE_AUDIO)
+        if ref.exists():
+            voice_id = _resolve_alex_via_voice(raw_turns, audio_path, ref)
+            if voice_id is not None:
+                return voice_id
+    return _resolve_alex_via_llm(raw_turns)
+
+
+def diarize(trans: TranscriptResult, audio_path: Path) -> list[Turn]:
+    """Group word-level transcript into speaker-labeled turns."""
+    if not trans.words:
+        return []
+    raw_turns = _group_words(trans.words)
+    if not raw_turns:
+        return []
+
+    alex_id = _resolve_alex(raw_turns, audio_path)
+    out: list[Turn] = []
+    for t in raw_turns:
+        speaker: Speaker = "alex" if t.speaker_id == alex_id else "attendee"
+        out.append(
             Turn(
-                speaker=cur_speaker,
-                start_s=cur_start,
-                end_s=cur_end,
-                text=" ".join(cur_parts),
+                speaker=speaker,
+                start_s=t.start_s,
+                end_s=t.end_s,
+                text=t.text,
             )
         )
-    return turns
+    return out

@@ -18,11 +18,16 @@ def _required(name: str) -> str:
 
 
 OPENAI_API_KEY = _required("OPENAI_API_KEY")
+DEEPGRAM_API_KEY = _required("DEEPGRAM_API_KEY")
 QDRANT_URL = _required("QDRANT_URL")
 QDRANT_API_KEY = _required("QDRANT_API_KEY")
 DATABASE_URL = _required("DATABASE_URL")
 DATABASE_URL_UNPOOLED = os.environ.get("DATABASE_URL_UNPOOLED", DATABASE_URL)
 BLOB_READ_WRITE_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
+# Optional: path to a short solo clip of Alex. If set, voice fingerprinting
+# tags one Deepgram speaker cluster as Alex by similarity. If unset, falls
+# back to a one-shot LLM cluster-text classifier.
+ALEX_REFERENCE_AUDIO = os.environ.get("ALEX_REFERENCE_AUDIO", "").strip() or None
 
 QDRANT_COLLECTION_SEGMENTS = "segments"
 QDRANT_COLLECTION_FRAMES = "frames"

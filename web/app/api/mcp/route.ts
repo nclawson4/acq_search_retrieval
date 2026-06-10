@@ -83,6 +83,8 @@ async function buildServer(): Promise<McpServer> {
                 a_end_s: h.aEndS,
                 a_text: h.aText,
                 matched_kind: h.matchedKind,
+                snippet: h.snippet,
+                snippet_start_s: h.snippetStartS,
                 score: h.score,
                 industry: h.industry,
                 revenue_band: h.revenueBand,

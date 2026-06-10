@@ -115,13 +115,16 @@ def ingest_one(url: str, force: bool = False) -> dict:
         )
     )
 
-    _log("  transcribing ...")
+    _log("  transcribing + diarizing (Deepgram nova-3) ...")
     trans = transcribe(d.audio_path)
-    _log(f"    {len(trans.words)} words")
+    n_speakers = len({w.speaker for w in trans.words}) if trans.words else 0
+    _log(f"    {len(trans.words)} words across {n_speakers} speaker cluster(s)")
 
-    _log("  diarizing (LLM) ...")
-    turns = diarize(trans)
-    _log(f"    {len(turns)} turns")
+    _log("  resolving Alex speaker (voice fingerprint or LLM fallback) ...")
+    turns = diarize(trans, d.audio_path)
+    n_alex = sum(1 for t in turns if t.speaker == "alex")
+    n_att = sum(1 for t in turns if t.speaker == "attendee")
+    _log(f"    {len(turns)} turns ({n_alex} alex / {n_att} attendee)")
 
     moments = pair_turns(turns)
     _log(f"    {len(moments)} Q->A moments")

@@ -236,11 +236,12 @@ export default async function Home({
         <ul className="mt-8 space-y-4">
           {strongHits.map((hit, i) => {
             const duration = Math.max(0, Math.round(hit.aEndS - hit.qStartS));
-            const speakerToShowQ = speaker !== "question"; // hide question text in "questions" mode
-            const speakerToShowA = speaker !== "question";
+            const matchedLabel = hit.matchedKind === "answer" ? "Alex" : "Attendee";
+            const otherText = hit.matchedKind === "answer" ? hit.qText : hit.aText;
+            const otherLabel = hit.matchedKind === "answer" ? "Q" : "A";
             return (
               <li
-                key={`${hit.videoId}-${hit.qStartS}-${i}`}
+                key={`${hit.videoId}-${hit.snippetStartS}-${i}`}
                 className="group flex flex-col sm:flex-row gap-4 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition relative focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100"
               >
                 <a
@@ -248,7 +249,7 @@ export default async function Home({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute inset-0 z-0"
-                  aria-label={`Play ${hit.videoTitle || hit.videoId} at ${fmtTime(hit.qStartS)}`}
+                  aria-label={`Play ${hit.videoTitle || hit.videoId} at ${fmtTime(hit.snippetStartS)}`}
                 />
                 <div className="relative z-10 pointer-events-none contents">
                   {hit.frameUrl ? (
@@ -268,7 +269,7 @@ export default async function Home({
                         {hit.videoTitle || hit.videoId}
                       </h2>
                       <span className="text-xs text-zinc-500 tabular-nums shrink-0">
-                        {fmtTime(hit.qStartS)} · {duration}s
+                        {fmtTime(hit.snippetStartS)} · {duration}s
                       </span>
                     </div>
                     {(hit.industry || hit.revenueBand || hit.problems.length > 0) && (
@@ -293,26 +294,25 @@ export default async function Home({
                         ))}
                       </div>
                     )}
-                    {speakerToShowQ && hit.qText && (
-                      <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                        <span className="font-medium text-zinc-700 dark:text-zinc-300">Q:</span>{" "}
-                        {hit.qText}
+                    {hit.snippet && (
+                      <p className="mt-2 text-sm text-zinc-800 dark:text-zinc-200 line-clamp-3">
+                        <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {matchedLabel}:
+                        </span>{" "}
+                        {hit.snippet}
                       </p>
                     )}
-                    {speakerToShowA && hit.aText && (
-                      <p className="mt-1 text-sm text-zinc-800 dark:text-zinc-200 line-clamp-3">
-                        <span className="font-medium text-zinc-900 dark:text-zinc-100">A:</span>{" "}
-                        {hit.aText}
-                      </p>
-                    )}
-                    {!speakerToShowA && hit.qText && (
-                      <p className="mt-1 text-sm text-zinc-800 dark:text-zinc-200 line-clamp-3">
-                        {hit.qText}
+                    {otherText && (
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                          {otherLabel}:
+                        </span>{" "}
+                        {otherText}
                       </p>
                     )}
                     <div className="mt-2 flex items-center gap-3 text-xs">
                       <span className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:underline underline-offset-2">
-                        Play at {fmtTime(hit.qStartS)} →
+                        Play at {fmtTime(hit.snippetStartS)} →
                       </span>
                       <span className="text-zinc-400">·</span>
                       <a
