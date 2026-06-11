@@ -143,20 +143,31 @@ async function buildServer(): Promise<McpServer> {
   return server;
 }
 
-// Fail-closed bearer check. If MCP_TOKEN is unset, EVERY request is rejected
-// — the previous default ("return true when no token configured") let any
-// caller trigger paid OpenAI search calls and read transcripts. Constant-
-// length compare so the auth pathway doesn't leak token length via timing.
+function constantEq(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+// Fail-closed token check. Accepts the token via either:
+//   - `Authorization: Bearer <token>` header (curl, Claude Desktop config)
+//   - `?token=<token>` URL query param (Claude.ai custom connectors, which
+//     do not support custom headers in their UI)
 function checkAuth(req: Request): boolean {
   if (!MCP_TOKEN) return false;
+
   const auth = req.headers.get("authorization") ?? "";
-  const expected = `Bearer ${MCP_TOKEN}`;
-  if (auth.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < auth.length; i++) {
-    diff |= auth.charCodeAt(i) ^ expected.charCodeAt(i);
+  if (auth && constantEq(auth, `Bearer ${MCP_TOKEN}`)) return true;
+
+  try {
+    const url = new URL(req.url);
+    const qToken = url.searchParams.get("token") ?? "";
+    if (qToken && constantEq(qToken, MCP_TOKEN)) return true;
+  } catch {
+    // ignore URL parse failures
   }
-  return diff === 0;
+  return false;
 }
 
 async function handle(req: Request): Promise<Response> {
