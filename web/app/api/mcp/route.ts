@@ -143,10 +143,20 @@ async function buildServer(): Promise<McpServer> {
   return server;
 }
 
+// Fail-closed bearer check. If MCP_TOKEN is unset, EVERY request is rejected
+// — the previous default ("return true when no token configured") let any
+// caller trigger paid OpenAI search calls and read transcripts. Constant-
+// length compare so the auth pathway doesn't leak token length via timing.
 function checkAuth(req: Request): boolean {
-  if (!MCP_TOKEN) return true;
+  if (!MCP_TOKEN) return false;
   const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${MCP_TOKEN}`;
+  const expected = `Bearer ${MCP_TOKEN}`;
+  if (auth.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < auth.length; i++) {
+    diff |= auth.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 async function handle(req: Request): Promise<Response> {

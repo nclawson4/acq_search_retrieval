@@ -132,8 +132,35 @@ export default function MobileHeroAnimation() {
   return (
     <div
       className="relative w-full mx-auto select-none"
-      style={{ maxWidth: `${PANE_W}px`, height: `${PANE_H}px` }}
+      style={{ maxWidth: `${PANE_W}px` }}
     >
+      {/* Phase label so the user knows what they're watching */}
+      <div className="flex items-center justify-center gap-2 mb-3 text-[10px] uppercase tracking-[0.22em] font-semibold">
+        <span
+          className={
+            showBefore
+              ? "text-zinc-900 dark:text-zinc-50"
+              : "text-zinc-400 dark:text-zinc-600"
+          }
+        >
+          Before
+        </span>
+        <span className="text-zinc-300 dark:text-zinc-700">→</span>
+        <span
+          className={
+            showAfter
+              ? "text-indigo-600 dark:text-indigo-400"
+              : "text-zinc-400 dark:text-zinc-600"
+          }
+        >
+          After
+        </span>
+      </div>
+
+      <div
+        className="relative"
+        style={{ height: `${PANE_H}px` }}
+      >
       <div
         className="absolute inset-0"
         style={{
@@ -164,6 +191,7 @@ export default function MobileHeroAnimation() {
           showResult={afterShowResult}
           showChips={afterShowChips}
         />
+      </div>
       </div>
     </div>
   );

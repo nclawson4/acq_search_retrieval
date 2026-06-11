@@ -72,10 +72,20 @@ export default async function Home({
       cookieStore.get("demo_auth")?.value === demoPassword;
     if (!authed && demoPassword.length > 0) {
       const hdrs = await headers();
-      const forwarded = hdrs.get("x-forwarded-for") ?? "";
+      // Prefer Vercel's authoritative `x-real-ip`. The leading entry of
+      // `x-forwarded-for` is user-controllable and would let a single
+      // attacker bypass the gate by rotating the header value per request.
       const ip =
-        forwarded.split(",")[0]?.trim() ||
-        hdrs.get("x-real-ip") ||
+        hdrs.get("x-real-ip")?.trim() ||
+        hdrs.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+        // Last-resort fallback: rightmost entry of x-forwarded-for (last
+        // hop Vercel observed, harder to spoof than the head).
+        hdrs
+          .get("x-forwarded-for")
+          ?.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .at(-1) ||
         "anonymous";
       const { overLimit } = await incrementAnonymousSearch(ip);
       if (overLimit) {

@@ -17,11 +17,20 @@ export async function incrementAnonymousSearch(
   ip: string,
 ): Promise<{ count: number; overLimit: boolean }> {
   const redis = getRedis();
-  // Fail open when Redis isn't configured — local dev / preview without KV.
-  if (!redis) return { count: 0, overLimit: false };
+  // Fail closed: if KV isn't configured OR the call throws (network blip,
+  // Upstash outage), refuse anonymous searches. The login redirect still
+  // lets authenticated users through, but anonymous traffic can't bypass
+  // the free-tier gate just because Redis went away.
+  // Exception: local dev where DEMO_PASSWORD itself isn't set. In that case
+  // the caller never gets here (page.tsx skips the gate entirely).
+  if (!redis) return { count: 0, overLimit: true };
 
-  const key = `search_count:${ip}`;
-  const count = await redis.incr(key);
-  if (count === 1) await redis.expire(key, TTL_SECONDS);
-  return { count, overLimit: count > SEARCH_FREE_LIMIT };
+  try {
+    const key = `search_count:${ip}`;
+    const count = await redis.incr(key);
+    if (count === 1) await redis.expire(key, TTL_SECONDS);
+    return { count, overLimit: count > SEARCH_FREE_LIMIT };
+  } catch {
+    return { count: 0, overLimit: true };
+  }
 }

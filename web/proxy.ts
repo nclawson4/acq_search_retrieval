@@ -37,11 +37,23 @@ if (KV_URL && KV_TOKEN) {
   });
 }
 
+// Vercel sets `x-real-ip` to the authoritative client IP and `x-vercel-
+// forwarded-for` as a backup. The leading entry of `x-forwarded-for` is
+// user-controllable (clients can spoof it before the request reaches
+// Vercel's edge) and must never be the primary rate-limit key.
 function clientIp(req: NextRequest): string {
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
   const real = req.headers.get("x-real-ip");
-  return real || "anon";
+  if (real) return real.trim();
+  const vercelFwd = req.headers.get("x-vercel-forwarded-for");
+  if (vercelFwd) return vercelFwd.split(",")[0].trim();
+  // Last resort: take the RIGHTMOST entry in x-forwarded-for, which is the
+  // last hop Vercel saw (closest to the edge, harder to spoof than the head).
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
+  return "anon";
 }
 
 export async function proxy(req: NextRequest) {
@@ -52,13 +64,45 @@ export async function proxy(req: NextRequest) {
   // in app/page.tsx and is gated against the same Redis store.
   const isRateLimited =
     pathname.startsWith("/api/search") || pathname.startsWith("/api/mcp");
-  if (!isRateLimited || !perIp || !dailyCap) return NextResponse.next();
+  if (!isRateLimited) return NextResponse.next();
+
+  // Fail closed: if KV isn't configured (or initialisation failed earlier)
+  // the rate-limited paths are refused with 503. Letting them through with
+  // no metering would expose the OpenAI cost budget to anyone with the URL.
+  if (!perIp || !dailyCap) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Rate limiter unavailable. Try again shortly.",
+      }),
+      {
+        status: 503,
+        headers: {
+          "content-type": "application/json",
+          "x-ratelimit-scope": "unavailable",
+        },
+      },
+    );
+  }
 
   const ip = clientIp(req);
-  const [ipResult, capResult] = await Promise.all([
-    perIp.limit(`ip:${ip}`),
-    dailyCap.limit("global"),
-  ]);
+  let ipResult, capResult;
+  try {
+    [ipResult, capResult] = await Promise.all([
+      perIp.limit(`ip:${ip}`),
+      dailyCap.limit("global"),
+    ]);
+  } catch {
+    // Same fail-closed posture if the limiter throws mid-call.
+    return new NextResponse(
+      JSON.stringify({
+        error: "Rate limiter unavailable. Try again shortly.",
+      }),
+      {
+        status: 503,
+        headers: { "content-type": "application/json" },
+      },
+    );
+  }
 
   if (!capResult.success) {
     return new NextResponse(

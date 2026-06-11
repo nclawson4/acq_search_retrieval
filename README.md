@@ -4,27 +4,47 @@ A production-grade AI-native search and retrieval system over a 500+ minute long
 
 The same retrieval surface is exposed three ways: a web portal for editors, a JSON API for internal tooling, and an MCP server for AI agents.
 
-![Demo screenshot](docs/demo.png)
-> Drop a screen-capture GIF of the homepage at `docs/demo.gif` to replace this still.
+![Demo](docs/demo.gif)
 
----
+## What it costs to find one clip
 
-## Table of contents
+| | Manual editor scrubbing | This system |
+|---|---|---|
+| Time per clip | 30 to 60 minutes | 2 to 3 seconds |
+| Cost per clip | $25 to $80 (1 hr × $50 to $80 senior-editor rate) | $0.0013 (one-eighth of a cent) |
+| Scales linearly with corpus | Yes (3x footage = 3x time) | No (10x footage = same latency) |
+| Repeatable for a different ICP | Start the search from scratch | Same query in seconds |
 
-1. [What it does](#what-it-does)
-2. [Why this design](#why-this-design)
-3. [Architecture](#architecture)
-4. [Ingest pipeline](#ingest-pipeline)
-5. [Search pipeline](#search-pipeline)
-6. [Evaluation and monitoring](#evaluation-and-monitoring)
-7. [Stack](#stack)
-8. [Local development](#local-development)
-9. [Deployment](#deployment)
-10. [Costs](#costs)
-11. [Security model](#security-model)
-12. [Project structure](#project-structure)
+Concrete per-month numbers for a studio finding 100 clips:
 
----
+| | Editor scrubbing only | With this system |
+|---|---|---|
+| Search labor | 75 hours | 5 minutes |
+| Labor cost at $60/hr | $4,500 | $5 |
+| OpenAI inference cost | $0 | $0.13 |
+| **Total** | **$4,500** | **~$5** |
+
+That is roughly a **900x latency reduction** per clip and a **34,000x cost reduction** per query, before counting opportunity cost of the editor's time on the work that actually requires a human.
+
+### Per-query cost breakdown
+
+At OpenAI list pricing:
+
+| Stage | Model | Tokens (typical) | Cost |
+|---|---|---|---|
+| Filter extraction | `gpt-4o-mini` | 530 in / 100 out | $0.000140 |
+| Query embedding | `text-embedding-3-small` | ~30 | $0.0000006 |
+| LLM judge re-rank | `gpt-4o-mini` | ~250 in / 30 out × 20 candidates | $0.001110 |
+| **Total per query** |  | | **~$0.00125** |
+
+Vector search (Qdrant) and Postgres reads add no marginal cost. Per-query cost is logged to `query_log` in Postgres; a rolling 24-hour sum drives the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
+
+| Item | One-time cost (per session) |
+|---|---|
+| Ingest tagger + audit (Claude Sonnet 4.6) | ~$0.005 |
+| Session embedding | ~$0.000005 |
+
+Full re-ingest of the current ~71-session corpus is about $0.40 in inference plus Deepgram transcription minutes.
 
 ## What it does
 
@@ -39,53 +59,43 @@ The system:
 
 The editor never sees the pipeline. They type a query, get back a list of clips, click play, YouTube opens at the right second.
 
-## Why this design
-
-Three design decisions drive everything:
-
-**Sessions, not segments.** The unit of retrieval is one attendee's full Q&A turn, not a transcript chunk. Editors think in "find me the restaurant guy", not "find me 30 seconds about pricing". Boundary detection is voice-clustered, not topic-clustered, so two attendees discussing the same problem still come back as two separate results.
-
-**Structured filters as first-class citizens.** Free-text RAG over this corpus collapses to mush because every session sounds similar (host + business owner discussing growth problems). A small LLM extracts industry, revenue band, gender, and topics from the query and applies them as hard payload filters in Qdrant. The remaining residual text drives the dense retrieval. This is what makes "med spa owners doing under $5M" return only med spa owners doing under $5M.
-
-**Audit gate on the tagger.** The auto-tagger has a verifier pass: it must produce a verbatim quote from the transcript supporting each industry tag, then a separate LLM judges whether the quote actually supports the tag. Sessions that fail the audit fall back to "other" rather than poisoning the index with hallucinated tags.
-
 ## Architecture
 
 ```
-                       ┌──────────────────────────────────────┐
-                       │           Web (Next.js 16)           │
-                       │  • / homepage (server component)     │
-                       │  • Mobile + desktop animated demos   │
-                       │  • IP-count gate (5 free per 24h)    │
-                       │  • Login (cookie-based bypass)       │
-                       │  • /api/mcp (MCP server)             │
-                       └────────────┬─────────────────────────┘
-                                    │
-                         ┌──────────┴──────────┐
-                         ▼                     ▼
-            ┌─────────────────────┐   ┌─────────────────────┐
-            │   Search pipeline   │   │     MCP tools       │
-            │   (lib/sessions.ts) │   │  (lib/search.ts)    │
-            └──────────┬──────────┘   └──────────┬──────────┘
-                       │                          │
-        ┌──────────────┼──────────────┐          │
-        ▼              ▼              ▼          ▼
-   ┌─────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-   │ OpenAI  │   │  Qdrant  │   │   Neon   │   │ Upstash  │
-   │ embed + │   │  vector  │   │ Postgres │   │  Redis   │
-   │ judge   │   │  search  │   │ (truth)  │   │ (rate)   │
-   └─────────┘   └──────────┘   └──────────┘   └──────────┘
-                       ▲
-                       │
-          ┌────────────┴────────────┐
-          │     Ingest pipeline     │
-          │       (Python)          │
-          │  yt-dlp -> Deepgram ->  │
-          │  Resemblyzer -> session │
-          │  boundaries -> Claude   │
-          │  tagger -> audit gate   │
-          │  -> embed -> upsert     │
-          └─────────────────────────┘
+                       +--------------------------------------+
+                       |           Web (Next.js 16)           |
+                       |  - / homepage (server component)     |
+                       |  - Mobile + desktop animated demos   |
+                       |  - IP-count gate (5 free per 24h)    |
+                       |  - Login (cookie-based bypass)       |
+                       |  - /api/mcp (MCP server, token-gated)|
+                       +------------------+-------------------+
+                                          |
+                            +-------------+-------------+
+                            v                           v
+              +-------------------------+   +-------------------------+
+              |     Search pipeline     |   |        MCP tools        |
+              |     (lib/sessions.ts)   |   |      (lib/search.ts)    |
+              +------------+------------+   +------------+------------+
+                           |                              |
+            +--------------+---------------+              |
+            v              v               v              v
+       +---------+   +----------+   +----------+   +----------+
+       | OpenAI  |   |  Qdrant  |   |   Neon   |   | Upstash  |
+       | embed + |   |  vector  |   | Postgres |   |  Redis   |
+       | judge   |   |  search  |   | (truth)  |   | (rate)   |
+       +---------+   +----------+   +----------+   +----------+
+                           ^
+                           |
+              +------------+------------+
+              |     Ingest pipeline     |
+              |       (Python)          |
+              |  yt-dlp -> Deepgram ->  |
+              |  Resemblyzer -> session |
+              |  boundaries -> Claude   |
+              |  tagger -> audit gate   |
+              |  -> embed -> upsert     |
+              +-------------------------+
 ```
 
 ## Ingest pipeline
@@ -113,27 +123,25 @@ The ingest pipeline writes ground-truth metadata to Neon Postgres and vector emb
 
 ```
 NL query
-   │
-   ▼
+   |
+   v
 [1] extractFilters (gpt-4o-mini, structured-output JSON schema)
-   │ {industry, revenueBands[], gender, topics[], residualText}
-   ▼
+   | {industry, revenueBands[], gender, topics[], residualText}
+   v
 [2] embed (text-embedding-3-small over residualText OR raw query)
-   │
-   ▼
+   |
+   v
 [3] Qdrant search with hard payload filter on industry/revenue/gender/topics
-   │ topK = 20 candidates
-   ▼
+   | topK = 20 candidates
+   v
 [4] LLM judge pass (gpt-4o-mini) scores each candidate 0..1
-   │ for "is this what the editor asked for"
-   ▼
+   | for "is this what the editor asked for"
+   v
 [5] Collapse: same-video same-cluster, then cross-video dup_group_id
-   │
-   ▼
+   |
+   v
 [6] Render: timestamped session cards with YouTube deep-link (?t=start_s-1)
 ```
-
-Per-query cost averages **$0.0013** at production prices ($0.15 / $0.60 per 1M tokens on gpt-4o-mini, $0.02 / 1M on embeddings). Five free anonymous queries cost about $0.0065 in OpenAI spend before the password gate kicks in.
 
 ## Evaluation and monitoring
 
@@ -168,93 +176,7 @@ Per-query cost averages **$0.0013** at production prices ($0.15 / $0.60 per 1M t
 - Anthropic Claude Sonnet 4.6 for the ingest-time tagger + audit (one-time per session)
 
 **Agent interface**
-- `@modelcontextprotocol/sdk` server at `/api/mcp` exposes `search_sessions` and `search_moments` tools. Bearer-token gated by `MCP_TOKEN`.
-
-## Local development
-
-Prerequisites:
-- Node 22+, Python 3.11+, ffmpeg
-- OpenAI, Anthropic, Deepgram, Qdrant Cloud accounts
-- Neon Postgres + Vercel KV (or Upstash Redis directly)
-
-```bash
-# 1. Clone and install
-git clone https://github.com/nclawson4/acq_search_retrieval.git
-cd acq_search_retrieval
-cp .env.example .env
-# fill in keys
-
-# 2. Web app
-cd web
-npm install
-cp ../.env .env.local
-# set ENABLE_DEV_ROUTES=1 in .env.local to expose /eval, /v/[id], and dev APIs
-npm run dev
-```
-
-Optional: run the ingest pipeline against a fresh batch of videos:
-
-```bash
-cd ingest
-pip install -r requirements.txt
-python pipeline.py --urls ../urls.txt
-python scripts/populate_sessions.py
-python scripts/retag_sessions_v2.py
-```
-
-Run the eval harness:
-
-```bash
-cd web
-npx tsx scripts/eval.ts --golden
-```
-
-## Deployment
-
-The web app deploys to Vercel as a Next.js project. The ingest pipeline is intended to run on developer machines or a dedicated worker; it's not designed for serverless.
-
-Vercel configuration:
-
-1. Connect the repo.
-2. Project root: `web/`.
-3. Attach a Neon Postgres database and a Vercel KV store. Both auto-inject the required env vars (`DATABASE_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`).
-4. Add the remaining env vars from `.env.example` in the Vercel dashboard. **Do not set `ENABLE_DEV_ROUTES`** in production.
-5. Set `DEMO_PASSWORD` to any string. This is the password presented after the IP free-tier is exhausted.
-
-The first deploy provisions the database schema via `ingest/schema.sql`. Run this against the Neon database before the first search.
-
-Production build is verified clean:
-
-```
-Route (app)
-┌ ƒ /                        (dynamic, server-rendered)
-├ ƒ /api/eval/*              (dev-gated, 404 unless ENABLE_DEV_ROUTES=1)
-├ ƒ /api/login               (public)
-├ ƒ /api/mcp                 (MCP_TOKEN gated)
-├ ƒ /api/search*             (dev-gated)
-├ ƒ /api/status              (public, health)
-├ ○ /eval                    (dev-gated via layout)
-├ ƒ /login                   (public)
-└ ƒ /v/[id]                  (dev-gated)
-```
-
-## Costs
-
-Indicative production costs at OpenAI list pricing:
-
-| Item | Unit | Per-query cost |
-|---|---|---|
-| Embed query | ~30 input tokens | $0.0000006 |
-| Filter extract | 530 in / 100 out | $0.00014 |
-| LLM judge (×20 candidates) | 5,000 in / 600 out | $0.00111 |
-| **Total per query** |  | **~$0.0013** |
-
-| Item | One-time cost (per session) |
-|---|---|
-| Ingest tagger + audit (Claude Sonnet 4.6) | ~$0.005 |
-| Session embedding | ~$0.000005 |
-
-At the current corpus size (~71 sessions across 55 videos, 9.2 hours), full re-ingest costs about $0.40 in inference plus Deepgram transcription minutes.
+- `@modelcontextprotocol/sdk` server at `/api/mcp` exposes `search_sessions` and `search_moments` tools. Bearer-token gated by `MCP_TOKEN` (required, fails closed).
 
 ## Security model
 
@@ -264,6 +186,9 @@ At the current corpus size (~71 sessions across 55 videos, 9.2 hours), full re-i
 - **Cookie flags**: `httpOnly`, `sameSite=lax`, `secure` when HTTPS. 30-day rolling expiry.
 - **Internal routes** (`/eval`, `/v/[id]`, `/api/eval/*`, `/api/search*`) are gated server-side by `ENABLE_DEV_ROUTES`. The home page does not depend on any of them.
 - **Rate limits** at the proxy layer (`web/proxy.ts`): 30 req/min per IP, 10k/day global. Anonymous search count is per-IP, per-day, stored in Redis with a 24-hour TTL.
+- **Client IP source**: trusts Vercel's `x-real-ip` first, then `x-vercel-forwarded-for`. The user-controllable leading entry of `x-forwarded-for` is never used as the rate-limit key.
+- **Fail-closed posture**: when Redis is unreachable, both the per-request rate limit and the IP-count free-tier gate refuse the request rather than letting it through unmetered.
+- **MCP endpoint** requires `MCP_TOKEN`; an unset token blocks every request.
 
 ## Project structure
 
@@ -301,10 +226,14 @@ acq_search_retrieval/
 │   ├── proxy.ts             # Next.js 16 middleware (rate limit)
 │   └── scripts/
 │       ├── eval.ts          # Golden-set + paraphrase eval harness
-│       └── hero_queries.ts  # Helper that runs the demo queries
+│       ├── hero_queries.ts  # Helper that runs the demo queries
+│       └── record_demo.ts   # Generates docs/demo.gif from the live site
 │
 ├── eval/
 │   └── golden_queries.yaml  # Hand-labeled retrieval ground truth
+│
+├── docs/
+│   └── demo.gif             # Hero animation (regenerate via record_demo.ts)
 │
 └── .env.example
 ```
