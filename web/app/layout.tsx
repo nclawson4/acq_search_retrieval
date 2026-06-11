@@ -18,7 +18,7 @@ const DESCRIPTION =
   "Search ranked, timestamped moments inside long-form videos by what was said and what was on screen. Surfaced as a web portal and a remote MCP server.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://acq-search-retrieval.vercel.app"),
+  metadataBase: new URL("https://acq-search-v1.vercel.app"),
   title: { default: APP_NAME, template: `%s — ${APP_NAME}` },
   description: DESCRIPTION,
   openGraph: {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sql } from "@/lib/db";
+import { devRoutesEnabled } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -90,6 +91,7 @@ export default async function VideoPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (!devRoutesEnabled()) notFound();
   const { id } = await params;
   const data = await fetchVideo(id);
   if (!data) notFound();

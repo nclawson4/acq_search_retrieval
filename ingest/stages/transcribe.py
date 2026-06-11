@@ -6,6 +6,10 @@ need to chunk like we did under Whisper.
 
 The speaker ids here are anonymous integers (0, 1, ...). The downstream
 `diarize` stage is responsible for resolving which integer is Alex.
+
+Raw Deepgram JSON responses are cached under CACHE_DIR/deepgram/ so we can
+re-derive sessions, snippets, or word-aligned outputs without re-paying
+for transcription.
 """
 from __future__ import annotations
 
@@ -15,7 +19,9 @@ from pathlib import Path
 
 import httpx
 
-from config import DEEPGRAM_API_KEY
+from config import CACHE_DIR, DEEPGRAM_API_KEY
+
+_DEEPGRAM_CACHE_DIR = CACHE_DIR / "deepgram"
 
 DEEPGRAM_URL = "https://api.deepgram.com/v1/listen"
 DEEPGRAM_PARAMS = {
@@ -58,7 +64,15 @@ def _content_type(path: Path) -> str:
     }.get(ext, "application/octet-stream")
 
 
+def _cache_path_for(audio_path: Path) -> Path:
+    return _DEEPGRAM_CACHE_DIR / f"{audio_path.stem}.json"
+
+
 def _call_deepgram(audio_path: Path) -> dict:
+    cache_path = _cache_path_for(audio_path)
+    if cache_path.exists():
+        return json.loads(cache_path.read_text(encoding="utf-8"))
+
     headers = {
         "Authorization": f"Token {DEEPGRAM_API_KEY}",
         "Content-Type": _content_type(audio_path),
@@ -75,7 +89,18 @@ def _call_deepgram(audio_path: Path) -> dict:
         raise RuntimeError(
             f"Deepgram returned {resp.status_code}: {resp.text[:500]}"
         )
-    return resp.json()
+    data = resp.json()
+    _DEEPGRAM_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps(data), encoding="utf-8")
+    return data
+
+
+def cached_response(audio_path: Path) -> dict | None:
+    """Return cached Deepgram JSON for this audio, or None if absent."""
+    cache_path = _cache_path_for(audio_path)
+    if not cache_path.exists():
+        return None
+    return json.loads(cache_path.read_text(encoding="utf-8"))
 
 
 def transcribe(audio_path: Path) -> TranscriptResult:

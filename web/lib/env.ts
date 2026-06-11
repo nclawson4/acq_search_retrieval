@@ -21,6 +21,13 @@ export const SEARCH_DAILY_GLOBAL_CAP = Number(
 );
 export const MCP_TOKEN = process.env.MCP_TOKEN ?? "";
 
+// Internal/dev-only routes (eval dashboard, per-video debug page, eval API,
+// MCP endpoint). Gated behind an env var so the public deploy doesn't expose
+// them. Set ENABLE_DEV_ROUTES=1 in .env.local to enable.
+export function devRoutesEnabled(): boolean {
+  return process.env.ENABLE_DEV_ROUTES === "1";
+}
+
 export const COLLECTION_SEGMENTS = "segments";
 export const COLLECTION_FRAMES = "frames";
 export const COLLECTION_MOMENTS = "moments";

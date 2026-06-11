@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { devRoutesEnabled } from "@/lib/env";
 import { searchMoments, type SpeakerMode } from "@/lib/search";
 
 export const runtime = "nodejs";
@@ -13,6 +14,7 @@ function parseList(v: string | null): string[] | undefined {
 }
 
 export async function GET(req: Request) {
+  if (!devRoutesEnabled()) return new Response(null, { status: 404 });
   const { searchParams } = new URL(req.url);
   const query = (searchParams.get("q") ?? "").trim();
   const k = Number(searchParams.get("k") ?? "10");

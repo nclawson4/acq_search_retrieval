@@ -1,199 +1,1909 @@
 {
-  "ranAt": "2026-06-09T17:04:13.096Z",
+  "ranAt": "2026-06-09T22:26:49.712Z",
   "mode": "synthetic",
   "k": 10,
-  "total": 5,
-  "recallAt5": 1,
-  "recallAt10": 1,
-  "mrr": 1,
+  "total": 50,
+  "recallAt5": 0.78,
+  "recallAt10": 0.84,
+  "mrr": 0.7744999999999999,
   "details": [
     {
-      "query": "Discussing challenges and time management in servicing SMBs after four months in a new role.",
-      "notes": "synthetic — paraphrased from source segment",
+      "query": "How does debt increase risk and volatility in a business?",
+      "notes": "synthetic — paraphrased from source answer",
       "source": "synthetic",
-      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedVideo": "gOG7zvp2ub0",
       "expectedTRange": [
-        19.6199989318848,
-        84.5400009155273
+        132.279998779297,
+        189.740005493164
       ],
       "rank": 1,
       "topHits": [
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 34.6199989318848,
-          "score": 0.5531461
+          "videoId": "gOG7zvp2ub0",
+          "startS": 147.279998779297,
+          "score": 0.7089963
+        },
+        {
+          "videoId": "gOG7zvp2ub0",
+          "startS": 181.360000610352,
+          "score": 0.5274393
         },
         {
           "videoId": "3Lvhd3LIwwY",
-          "startS": 0,
-          "score": 0.44404694
+          "startS": 49.2000007629395,
+          "score": 0.48308635
         },
         {
-          "videoId": "3t6sA6OmzHA",
-          "startS": 34.7999992370605,
-          "score": 0.42282805
+          "videoId": "LGbS0GOZBNE",
+          "startS": 94.6999969482422,
+          "score": 0.4658304
         },
         {
-          "videoId": "3t6sA6OmzHA",
-          "startS": 0,
-          "score": 0.41362432
-        },
-        {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 103.800003051758,
-          "score": 0.412102
+          "videoId": "4J_Bo4Dbxjk",
+          "startS": 231.899993896484,
+          "score": 0.44409966
         }
       ]
     },
     {
-      "query": "Benefits of starting at a small company for learning and salary potential.",
-      "notes": "synthetic — paraphrased from source segment",
+      "query": "Challenges of exiting a business like Gym Launch compared to other industries.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "cvn8nPtLtfc",
+      "expectedTRange": [
+        14.819999694824201,
+        147
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "cvn8nPtLtfc",
+          "startS": 29.8199996948242,
+          "score": 0.6474718
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 275.279998779297,
+          "score": 0.54771644
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 153.479995727539,
+          "score": 0.47442675
+        },
+        {
+          "videoId": "2RYARn7GMek",
+          "startS": 275.440002441406,
+          "score": 0.4655661
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 243.100006103516,
+          "score": 0.46137238
+        }
+      ]
+    },
+    {
+      "query": "How to integrate value propositions into onboarding for customer referrals?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "Ht9u-qEXTQY",
+      "expectedTRange": [
+        330.480010986328,
+        387.220001220703
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 345.480010986328,
+          "score": 0.580595
+        },
+        {
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 230.880004882812,
+          "score": 0.5472616
+        },
+        {
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 326.859985351562,
+          "score": 0.46391106
+        },
+        {
+          "videoId": "bYGRh4ZOdUo",
+          "startS": 255.100006103516,
+          "score": 0.44063148
+        },
+        {
+          "videoId": "lPZOkIvVxPc",
+          "startS": 317.559997558594,
+          "score": 0.42682147
+        }
+      ]
+    },
+    {
+      "query": "How to allocate resources for maximum leverage and improve team performance through best practices?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "RRFXliltxFM",
+      "expectedTRange": [
+        393.959991455078,
+        495.660003662109
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 408.959991455078,
+          "score": 0.5389213
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.5084356
+        },
+        {
+          "videoId": "lqKx0GDHFX8",
+          "startS": 291.640014648438,
+          "score": 0.48299482
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.4792662
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.47644398
+        }
+      ]
+    },
+    {
+      "query": "How to retain injectors in med spas and create a career path for them?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "wRe3Umk2hec",
+      "expectedTRange": [
+        400.779998779297,
+        502.839996337891
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 415.779998779297,
+          "score": 0.67999816
+        },
+        {
+          "videoId": "Ok8cv-ivKIw",
+          "startS": 34.0800018310547,
+          "score": 0.40403
+        },
+        {
+          "videoId": "bYGRh4ZOdUo",
+          "startS": 255.100006103516,
+          "score": 0.370384
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 382.260009765625,
+          "score": 0.3651765
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 220.839996337891,
+          "score": 0.3591424
+        }
+      ]
+    },
+    {
+      "query": "Can you handle selling 20 people a week to increase sales from 4 to 32?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "rd_urnkST6g",
+      "expectedTRange": [
+        478.239990234375,
+        566.900024414062
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "rd_urnkST6g",
+          "startS": 493.239990234375,
+          "score": 0.5813048
+        },
+        {
+          "videoId": "oIvIf1Rv7vg",
+          "startS": 315.100006103516,
+          "score": 0.49691647
+        },
+        {
+          "videoId": "UmBWqjwfgtA",
+          "startS": 501.059997558594,
+          "score": 0.49571145
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 153.479995727539,
+          "score": 0.47449815
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 303.200012207031,
+          "score": 0.45693803
+        }
+      ]
+    },
+    {
+      "query": "Sales organization strategies including SEO, customer upsell, referrals, and door-to-door sales.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "bYGRh4ZOdUo",
+      "expectedTRange": [
+        55.94000244140619,
+        100.4400024414062
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "bYGRh4ZOdUo",
+          "startS": 70.9400024414062,
+          "score": 0.5797261
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.5322894
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 394.760009765625,
+          "score": 0.49507642
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 162.240005493164,
+          "score": 0.49375218
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.49261144
+        }
+      ]
+    },
+    {
+      "query": "10 stages business quiz to assess functions and get free help for scaling at acquisition.com/roadmap.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "3t6sA6OmzHA",
+      "expectedTRange": [
+        175.960006713867,
+        246.279998779297
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "3t6sA6OmzHA",
+          "startS": 190.960006713867,
+          "score": 0.7735087
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.76955307
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 690.880004882812,
+          "score": 0.764224
+        },
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 468.299987792969,
+          "score": 0.7640063
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 374.239990234375,
+          "score": 0.7639493
+        }
+      ]
+    },
+    {
+      "query": "How to create a scalable seasonal business model like Halloween stores with minimal year-round effort?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "oNG9AXBcJ7M",
+      "expectedTRange": [
+        53.9199981689453,
+        153.919998168945
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "oNG9AXBcJ7M",
+          "startS": 68.9199981689453,
+          "score": 0.6339885
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 19.6800003051758,
+          "score": 0.5032423
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 90.3600006103516,
+          "score": 0.4884507
+        },
+        {
+          "videoId": "oNG9AXBcJ7M",
+          "startS": 322.239990234375,
+          "score": 0.41348702
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 291.100006103516,
+          "score": 0.39980423
+        }
+      ]
+    },
+    {
+      "query": "Sales culture issues affecting team consistency and script adherence, with variability in close rates and lead quality concerns.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "_4BGku-jLh4",
+      "expectedTRange": [
+        111.73999786377,
+        182.220001220703
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 126.73999786377,
+          "score": 0.77069855
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.6809168
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 179.580001831055,
+          "score": 0.66211116
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.64689386
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 408.959991455078,
+          "score": 0.5541664
+        }
+      ]
+    },
+    {
+      "query": "Discussion about spreads and a comparison to a brothel with midgets.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "IVNuDhV1uw4",
+      "expectedTRange": [
+        0,
+        59.1399993896484
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 9.65999984741211,
+          "score": 0.5146563
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.4891197
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 161.520004272461,
+          "score": 0.48298344
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 415.779998779297,
+          "score": 0.48252985
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 56.9199981689453,
+          "score": 0.47911704
+        }
+      ]
+    },
+    {
+      "query": "Discussion on solving non-existent problems and focusing on customer acquisition in AI business strategy.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "5rk7GElwf6M",
+      "expectedTRange": [
+        90.019996643066,
+        200.259994506836
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "5rk7GElwf6M",
+          "startS": 105.019996643066,
+          "score": 0.6867919
+        },
+        {
+          "videoId": "OulGPT2kZ7c",
+          "startS": 248.240005493164,
+          "score": 0.5403373
+        },
+        {
+          "videoId": "UmBWqjwfgtA",
+          "startS": 318.179992675781,
+          "score": 0.53648525
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 243.100006103516,
+          "score": 0.51266134
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.50233555
+        }
+      ]
+    },
+    {
+      "query": "Behind the scenes operations and missed opportunities for profit in location transitions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "4J_Bo4Dbxjk",
+      "expectedTRange": [
+        173.139999389648,
+        220.779998779297
+      ],
+      "rank": 6,
+      "topHits": [
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 236.759994506836,
+          "score": 0.440723
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 275.279998779297,
+          "score": 0.42201
+        },
+        {
+          "videoId": "rqJM6mFhyes",
+          "startS": 398.820007324219,
+          "score": 0.4196059
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.41578132
+        },
+        {
+          "videoId": "4J_Bo4Dbxjk",
+          "startS": 231.899993896484,
+          "score": 0.41247466
+        }
+      ]
+    },
+    {
+      "query": "Triple optimization and email follow-up leading to low margins and cash flow issues despite high revenue.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "fNPlt_C54KM",
+      "expectedTRange": [
+        343.440002441406,
+        388.959991455078
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 358.440002441406,
+          "score": 0.5730442
+        },
+        {
+          "videoId": "3Lvhd3LIwwY",
+          "startS": 49.2000007629395,
+          "score": 0.52105105
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 303.200012207031,
+          "score": 0.5174748
+        },
+        {
+          "videoId": "5rk7GElwf6M",
+          "startS": 288.200012207031,
+          "score": 0.5111563
+        },
+        {
+          "videoId": "rqJM6mFhyes",
+          "startS": 398.820007324219,
+          "score": 0.50715005
+        }
+      ]
+    },
+    {
+      "query": "Discussing the importance of quality and talent in operational leverage and project timelines.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "xRzZaHUOk4E",
+      "expectedTRange": [
+        417.660003662109,
+        475.320007324219
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 432.660003662109,
+          "score": 0.5910399
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 408.959991455078,
+          "score": 0.5122866
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.47621292
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.47409156
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 506,
+          "score": 0.46595037
+        }
+      ]
+    },
+    {
+      "query": "Sales ops issues, training cadence, scripting, team culture, and leadership impact on sales performance.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "IVNuDhV1uw4",
+      "expectedTRange": [
+        152.800003051758,
+        363.260009765625
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.6446086
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 126.73999786377,
+          "score": 0.5961757
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.59273666
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 179.580001831055,
+          "score": 0.58688825
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 408.959991455078,
+          "score": 0.5389476
+        }
+      ]
+    },
+    {
+      "query": "How to improve restaurant metrics and communicate financial facts to potential investors?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "0ZwRf4Dy_MM",
+      "expectedTRange": [
+        121.580001831055,
+        184.559997558594
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 136.580001831055,
+          "score": 0.5427054
+        },
+        {
+          "videoId": "u99G6KwRWQ0",
+          "startS": 60.7799987792969,
+          "score": 0.52638096
+        },
+        {
+          "videoId": "oIvIf1Rv7vg",
+          "startS": 315.100006103516,
+          "score": 0.45958537
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.44386226
+        },
+        {
+          "videoId": "gOG7zvp2ub0",
+          "startS": 181.360000610352,
+          "score": 0.4391876
+        }
+      ]
+    },
+    {
+      "query": "Is the salon a training school or a nail service? Discussing model improvements and customer capacity.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "I1NYJ8dm4Jk",
+      "expectedTRange": [
+        205.839996337891,
+        277.179992675781
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 220.839996337891,
+          "score": 0.7530584
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 299.959991455078,
+          "score": 0.561967
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 474.579986572266,
+          "score": 0.5538522
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 56.9199981689453,
+          "score": 0.52040505
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 415.779998779297,
+          "score": 0.5186343
+        }
+      ]
+    },
+    {
+      "query": "Suggesting alternative products for better sales and promoting personal content for more information.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "Sn5wBUC-SFk",
+      "expectedTRange": [
+        19.9199981689453,
+        73.15999984741211
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.4414777
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 394.760009765625,
+          "score": 0.4333946
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 219.199996948242,
+          "score": 0.41905808
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 162.240005493164,
+          "score": 0.41807374
+        },
+        {
+          "videoId": "rd_urnkST6g",
+          "startS": 493.239990234375,
+          "score": 0.41712314
+        }
+      ]
+    },
+    {
+      "query": "Discussion on the legality and profitability of franchises and their regulations.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "2RYARn7GMek",
+      "expectedTRange": [
+        166.580001831055,
+        242.199996948242
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "2RYARn7GMek",
+          "startS": 181.580001831055,
+          "score": 0.6674049
+        },
+        {
+          "videoId": "2RYARn7GMek",
+          "startS": 275.440002441406,
+          "score": 0.56805086
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 383.799987792969,
+          "score": 0.56398267
+        },
+        {
+          "videoId": "YJy7PL2apUo",
+          "startS": 503.600006103516,
+          "score": 0.49777982
+        },
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 136.580001831055,
+          "score": 0.45736724
+        }
+      ]
+    },
+    {
+      "query": "How to build a strong brand with one product instead of multiple in direct response marketing?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "fNPlt_C54KM",
+      "expectedTRange": [
+        379.760009765625,
+        464.760009765625
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 394.760009765625,
+          "score": 0.52729917
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 509.399993896484,
+          "score": 0.5033735
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.45369753
+        },
+        {
+          "videoId": "u99G6KwRWQ0",
+          "startS": 60.7799987792969,
+          "score": 0.4337418
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 408.959991455078,
+          "score": 0.43333158
+        }
+      ]
+    },
+    {
+      "query": "Keith Cunningham's thought process on evaluating business revenue upside and downside risks.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "YJy7PL2apUo",
+      "expectedTRange": [
+        183.720001220703,
+        263.10000610351597
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "YJy7PL2apUo",
+          "startS": 198.720001220703,
+          "score": 0.58867633
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 94.6999969482422,
+          "score": 0.45074543
+        },
+        {
+          "videoId": "lqKx0GDHFX8",
+          "startS": 291.640014648438,
+          "score": 0.42564413
+        },
+        {
+          "videoId": "gOG7zvp2ub0",
+          "startS": 181.360000610352,
+          "score": 0.40827364
+        },
+        {
+          "videoId": "gOG7zvp2ub0",
+          "startS": 147.279998779297,
+          "score": 0.39894226
+        }
+      ]
+    },
+    {
+      "query": "Discussion about equity and revenue goals in business growth conversation.",
+      "notes": "synthetic — paraphrased from source answer",
       "source": "synthetic",
       "expectedVideo": "LGbS0GOZBNE",
       "expectedTRange": [
-        397.720001220703,
-        462.600006103516
+        79.6999969482422,
+        150.240005493164
       ],
       "rank": 1,
       "topHits": [
         {
           "videoId": "LGbS0GOZBNE",
-          "startS": 412.720001220703,
-          "score": 0.5704296
+          "startS": 94.6999969482422,
+          "score": 0.55714107
+        },
+        {
+          "videoId": "lqKx0GDHFX8",
+          "startS": 291.640014648438,
+          "score": 0.5532253
+        },
+        {
+          "videoId": "lqKx0GDHFX8",
+          "startS": 137.020004272461,
+          "score": 0.4875874
+        },
+        {
+          "videoId": "OulGPT2kZ7c",
+          "startS": 130.559997558594,
+          "score": 0.43963253
         },
         {
           "videoId": "LGbS0GOZBNE",
-          "startS": 240.960006713867,
-          "score": 0.40267253
-        },
-        {
-          "videoId": "LGbS0GOZBNE",
-          "startS": 447.420013427734,
-          "score": 0.389539
-        },
-        {
-          "videoId": "LGbS0GOZBNE",
-          "startS": 378.679992675781,
-          "score": 0.37686872
-        },
-        {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 309.640014648438,
-          "score": 0.34810108
+          "startS": 325.540008544922,
+          "score": 0.43928155
         }
       ]
     },
     {
-      "query": "SMB churn rate, average sales per month, pricing strategy, revenue projections",
-      "notes": "synthetic — paraphrased from source segment",
+      "query": "Discussion on strategy and dependency in business deals with CPAs.",
+      "notes": "synthetic — paraphrased from source answer",
       "source": "synthetic",
-      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedVideo": "HlK_MeYWKEs",
       "expectedTRange": [
-        123.339996337891,
-        188
+        635.320007324219,
+        688.419982910156
       ],
-      "rank": 1,
+      "rank": 3,
       "topHits": [
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 138.339996337891,
-          "score": 0.5580436
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 230.880004882812,
+          "score": 0.60112816
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 172.399993896484,
-          "score": 0.50752306
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 345.480010986328,
+          "score": 0.50918627
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 69.4000015258789,
-          "score": 0.47159728
+          "videoId": "HlK_MeYWKEs",
+          "startS": 650.320007324219,
+          "score": 0.49156883
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 0,
-          "score": 0.4471939
+          "videoId": "HlK_MeYWKEs",
+          "startS": 816.599975585938,
+          "score": 0.4318502
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 103.800003051758,
-          "score": 0.42600676
+          "videoId": "-G08--_mZaU",
+          "startS": 161.520004272461,
+          "score": 0.4221664
         }
       ]
     },
     {
-      "query": "Impact of churn and rising CAC on SMB margins and revenue growth.",
-      "notes": "synthetic — paraphrased from source segment",
+      "query": "Discussion about capacity, customer service limits, and potential for doubling sales.",
+      "notes": "synthetic — paraphrased from source answer",
       "source": "synthetic",
-      "expectedVideo": "3Lvhd3LIwwY",
+      "expectedVideo": "TaeBazpcRk8",
       "expectedTRange": [
-        54.400001525878906,
-        118.860000610352
+        94.440002441406,
+        170.559997558594
       ],
       "rank": 1,
       "topHits": [
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 69.4000015258789,
-          "score": 0.6705977
+          "videoId": "TaeBazpcRk8",
+          "startS": 109.440002441406,
+          "score": 0.62156254
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 309.640014648438,
-          "score": 0.51895833
+          "videoId": "fNPlt_C54KM",
+          "startS": 358.440002441406,
+          "score": 0.50176406
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 138.339996337891,
-          "score": 0.45560503
+          "videoId": "oIvIf1Rv7vg",
+          "startS": 315.100006103516,
+          "score": 0.47479156
         },
         {
-          "videoId": "3t6sA6OmzHA",
-          "startS": 0,
-          "score": 0.42582202
+          "videoId": "fNPlt_C54KM",
+          "startS": 303.200012207031,
+          "score": 0.4731149
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 172.399993896484,
-          "score": 0.41156852
+          "videoId": "rd_urnkST6g",
+          "startS": 493.239990234375,
+          "score": 0.44838402
         }
       ]
     },
     {
-      "query": "Discussion about revenue, sales position, and past hustles including mailbox replacements.",
-      "notes": "synthetic — paraphrased from source segment",
+      "query": "Sales agency selling electricity, canvassing neighborhoods, issues with installation after contract sale.",
+      "notes": "synthetic — paraphrased from source answer",
       "source": "synthetic",
-      "expectedVideo": "LGbS0GOZBNE",
+      "expectedVideo": "2PfbKVGNgPM",
       "expectedTRange": [
-        123.339996337891,
-        188.020004272461
+        15.0599994659424,
+        68.439998626709
       ],
       "rank": 1,
+      "topHits": [
+        {
+          "videoId": "2PfbKVGNgPM",
+          "startS": 30.0599994659424,
+          "score": 0.6892725
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.4511134
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.42318285
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 126.73999786377,
+          "score": 0.40428707
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 198.300003051758,
+          "score": 0.4024133
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business owners to identify growth stages and solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "HlK_MeYWKEs",
+      "expectedTRange": [
+        801.599975585938,
+        912.419982910156
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 506,
+          "score": 0.69101775
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.67856985
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.6676564
+        },
+        {
+          "videoId": "2PfbKVGNgPM",
+          "startS": 105.339996337891,
+          "score": 0.6671791
+        },
+        {
+          "videoId": "cvn8nPtLtfc",
+          "startS": 307.540008544922,
+          "score": 0.66637444
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business growth and overcoming challenges.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "wRe3Umk2hec",
+      "expectedTRange": [
+        495.079986572266,
+        606.539978027344
+      ],
+      "rank": 10,
+      "topHits": [
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 506,
+          "score": 0.68483
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.67678976
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.66507286
+        },
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 468.299987792969,
+          "score": 0.65899426
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.65486795
+        }
+      ]
+    },
+    {
+      "query": "How to generate leads for motel owners and the importance of commitment in thought leadership.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "zk5jD2uko_k",
+      "expectedTRange": [
+        176.100006103516,
+        525.609985351562
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "zk5jD2uko_k",
+          "startS": 191.100006103516,
+          "score": 0.4685568
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 162.240005493164,
+          "score": 0.46731544
+        },
+        {
+          "videoId": "u99G6KwRWQ0",
+          "startS": 60.7799987792969,
+          "score": 0.46716088
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.45771238
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 161.520004272461,
+          "score": 0.4281227
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business owners to identify growth stages and solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "0ZwRf4Dy_MM",
+      "expectedTRange": [
+        320.859985351562,
+        413.140014648438
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 506,
+          "score": 0.66075766
+        },
+        {
+          "videoId": "2PfbKVGNgPM",
+          "startS": 105.339996337891,
+          "score": 0.6515
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.6467431
+        },
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 468.299987792969,
+          "score": 0.64590085
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.64046353
+        }
+      ]
+    },
+    {
+      "query": "Business focus on customer satisfaction over personal entrepreneurial desires.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "wRe3Umk2hec",
+      "expectedTRange": [
+        93.339996337891,
+        146.559997558594
+      ],
+      "rank": null,
       "topHits": [
         {
           "videoId": "LGbS0GOZBNE",
-          "startS": 138.339996337891,
-          "score": 0.60221094
+          "startS": 325.540008544922,
+          "score": 0.48765212
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 338.459991455078,
+          "score": 0.4852181
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 275.279998779297,
+          "score": 0.48372352
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.48034298
+        },
+        {
+          "videoId": "4J_Bo4Dbxjk",
+          "startS": 231.899993896484,
+          "score": 0.47615218
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business owners to identify growth stages and solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "_4BGku-jLh4",
+      "expectedTRange": [
+        491,
+        604.52001953125
+      ],
+      "rank": 8,
+      "topHits": [
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.7514417
+        },
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 468.299987792969,
+          "score": 0.7404058
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 429.559997558594,
+          "score": 0.7393607
+        },
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 335.859985351562,
+          "score": 0.7374941
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 432.160003662109,
+          "score": 0.73558354
+        }
+      ]
+    },
+    {
+      "query": "Challenges of selling high-end professional services and the impact of choosing easy solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "oIvIf1Rv7vg",
+      "expectedTRange": [
+        38.0999984741211,
+        109.7200012207031
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "oIvIf1Rv7vg",
+          "startS": 53.0999984741211,
+          "score": 0.57770026
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 161.520004272461,
+          "score": 0.5094546
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 394.760009765625,
+          "score": 0.49292928
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.48902524
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.47487003
+        }
+      ]
+    },
+    {
+      "query": "How training sales processes impacts team outcomes and skill levels in business.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "IVNuDhV1uw4",
+      "expectedTRange": [
+        352.200012207031,
+        400.059997558594
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 367.200012207031,
+          "score": 0.53504163
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.53252715
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.5205467
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.52047175
+        },
+        {
+          "videoId": "lPZOkIvVxPc",
+          "startS": 187.199996948242,
+          "score": 0.514089
+        }
+      ]
+    },
+    {
+      "query": "How to reduce churn and double business profits in two and a half years?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "TaeBazpcRk8",
+      "expectedTRange": [
+        323.459991455078,
+        497.200012207031
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 315.420013427734,
+          "score": 0.59575766
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 275.279998779297,
+          "score": 0.5393106
+        },
+        {
+          "videoId": "TaeBazpcRk8",
+          "startS": 338.459991455078,
+          "score": 0.501385
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.48333967
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.4565938
+        }
+      ]
+    },
+    {
+      "query": "How to differentiate vision from plan in business and franchise model suggestions?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "I1NYJ8dm4Jk",
+      "expectedTRange": [
+        41.9199981689453,
+        157.899993896484
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 56.9199981689453,
+          "score": 0.46970665
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 325.540008544922,
+          "score": 0.4353457
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 510.079986572266,
+          "score": 0.43231022
+        },
+        {
+          "videoId": "cvn8nPtLtfc",
+          "startS": 307.540008544922,
+          "score": 0.42848444
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.428476
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap quiz for business growth and support at acquisition.com.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "UmBWqjwfgtA",
+      "expectedTRange": [
+        579.119995117188,
+        709.52001953125
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.8110112
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 429.559997558594,
+          "score": 0.80598986
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 432.160003662109,
+          "score": 0.8003533
+        },
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 335.859985351562,
+          "score": 0.79931855
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.7988559
+        }
+      ]
+    },
+    {
+      "query": "Discussion about spread and house volume, expressing surprise at high numbers.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "_4BGku-jLh4",
+      "expectedTRange": [
+        0,
+        49.5
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 9.65999984741211,
+          "score": 0.52462023
+        },
+        {
+          "videoId": "rd_urnkST6g",
+          "startS": 714.260009765625,
+          "score": 0.44633365
+        },
+        {
+          "videoId": "rd_urnkST6g",
+          "startS": 493.239990234375,
+          "score": 0.43826532
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 9.65999984741211,
+          "score": 0.41956243
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.40972817
+        }
+      ]
+    },
+    {
+      "query": "Free business roadmap offer and invitation to book a call for scaling help.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "-G08--_mZaU",
+      "expectedTRange": [
+        535.97998046875,
+        597.760009765625
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "lPZOkIvVxPc",
+          "startS": 317.559997558594,
+          "score": 0.6987076
+        },
+        {
+          "videoId": "bYGRh4ZOdUo",
+          "startS": 502.420013427734,
+          "score": 0.69726706
+        },
+        {
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 450.559997558594,
+          "score": 0.69602025
+        },
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 335.859985351562,
+          "score": 0.6937616
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.6936241
+        }
+      ]
+    },
+    {
+      "query": "Can you sell more low touch units than high touch and improve gross margin?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "oIvIf1Rv7vg",
+      "expectedTRange": [
+        300.100006103516,
+        381.100006103516
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "oIvIf1Rv7vg",
+          "startS": 315.100006103516,
+          "score": 0.5963872
         },
         {
           "videoId": "3Lvhd3LIwwY",
-          "startS": 0,
-          "score": 0.41859645
+          "startS": 153.479995727539,
+          "score": 0.5122348
         },
         {
-          "videoId": "3Lvhd3LIwwY",
-          "startS": 103.800003051758,
-          "score": 0.3923262
+          "videoId": "fNPlt_C54KM",
+          "startS": 303.200012207031,
+          "score": 0.49607164
         },
         {
-          "videoId": "3t6sA6OmzHA",
-          "startS": 0,
-          "score": 0.35799187
+          "videoId": "rd_urnkST6g",
+          "startS": 493.239990234375,
+          "score": 0.4797569
         },
         {
-          "videoId": "3t6sA6OmzHA",
-          "startS": 34.7999992370605,
-          "score": 0.3408636
+          "videoId": "7w1HQAvlLZk",
+          "startS": 67.3399963378906,
+          "score": 0.47263113
+        }
+      ]
+    },
+    {
+      "query": "Sales team commission structure, ops issues, leadership, and culture of consistency in sales performance.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "IVNuDhV1uw4",
+      "expectedTRange": [
+        47.6399993896484,
+        169.080001831055
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 62.6399993896484,
+          "score": 0.6710167
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 167.800003051758,
+          "score": 0.5570846
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 126.73999786377,
+          "score": 0.54036635
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 90.6800003051758,
+          "score": 0.5272374
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 179.580001831055,
+          "score": 0.51438546
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business owners to identify growth challenges and solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "gMXG_HoYnRY",
+      "expectedTRange": [
+        364.540008544922,
+        460.119995117188
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.7213602
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 429.559997558594,
+          "score": 0.70963246
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.7081124
+        },
+        {
+          "videoId": "0ZwRf4Dy_MM",
+          "startS": 335.859985351562,
+          "score": 0.70792264
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 432.160003662109,
+          "score": 0.70731926
+        }
+      ]
+    },
+    {
+      "query": "Free $100 million scaling roadmap for business owners to identify growth stages and solutions.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "cvn8nPtLtfc",
+      "expectedTRange": [
+        292.540008544922,
+        395.420013427734
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 379.540008544922,
+          "score": 0.6991761
+        },
+        {
+          "videoId": "_4BGku-jLh4",
+          "startS": 506,
+          "score": 0.6939261
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 429.559997558594,
+          "score": 0.68959147
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 541.940002441406,
+          "score": 0.6894064
+        },
+        {
+          "videoId": "7w1HQAvlLZk",
+          "startS": 432.160003662109,
+          "score": 0.6878613
+        }
+      ]
+    },
+    {
+      "query": "Critique of college entrepreneurship classes focusing on invention instead of existing business models.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "Sn5wBUC-SFk",
+      "expectedTRange": [
+        102.940002441406,
+        180.899993896484
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "Sn5wBUC-SFk",
+          "startS": 117.940002441406,
+          "score": 0.5883347
+        },
+        {
+          "videoId": "2RYARn7GMek",
+          "startS": 275.440002441406,
+          "score": 0.4946971
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 325.540008544922,
+          "score": 0.4361645
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 300.980010986328,
+          "score": 0.42942595
+        },
+        {
+          "videoId": "OulGPT2kZ7c",
+          "startS": 248.240005493164,
+          "score": 0.42819422
+        }
+      ]
+    },
+    {
+      "query": "$100 million scaling roadmap analysis of portfolio companies' growth stages and challenges",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "Uw9weyjJL1A",
+      "expectedTRange": [
+        447.100006103516,
+        489.519989013672
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "Uw9weyjJL1A",
+          "startS": 462.100006103516,
+          "score": 0.77569455
+        },
+        {
+          "videoId": "xRzZaHUOk4E",
+          "startS": 468.299987792969,
+          "score": 0.6804147
+        },
+        {
+          "videoId": "rqJM6mFhyes",
+          "startS": 485.679992675781,
+          "score": 0.66167396
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 374.239990234375,
+          "score": 0.65849125
+        },
+        {
+          "videoId": "fNPlt_C54KM",
+          "startS": 690.880004882812,
+          "score": 0.6580048
+        }
+      ]
+    },
+    {
+      "query": "How to create a bifurcated offer with emotional and logical persuasion for business growth?",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "lPZOkIvVxPc",
+      "expectedTRange": [
+        302.559997558594,
+        452.480010986328
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "lPZOkIvVxPc",
+          "startS": 317.559997558594,
+          "score": 0.45150405
+        },
+        {
+          "videoId": "RRFXliltxFM",
+          "startS": 219.199996948242,
+          "score": 0.43042776
+        },
+        {
+          "videoId": "Tk0e0z8h64Y",
+          "startS": 308.160003662109,
+          "score": 0.42429364
+        },
+        {
+          "videoId": "HaCf4VlnDLw",
+          "startS": 198.300003051758,
+          "score": 0.4238245
+        },
+        {
+          "videoId": "Ht9u-qEXTQY",
+          "startS": 230.880004882812,
+          "score": 0.42117992
+        }
+      ]
+    },
+    {
+      "query": "Med spa owners relying on signs for customers instead of PPC and social media strategies.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "wRe3Umk2hec",
+      "expectedTRange": [
+        276.100006103516,
+        350.320007324219
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 291.100006103516,
+          "score": 0.63237214
+        },
+        {
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 173.199996948242,
+          "score": 0.43198085
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 162.240005493164,
+          "score": 0.42691723
+        },
+        {
+          "videoId": "u99G6KwRWQ0",
+          "startS": 60.7799987792969,
+          "score": 0.3985603
+        },
+        {
+          "videoId": "wRe3Umk2hec",
+          "startS": 415.779998779297,
+          "score": 0.3984677
+        }
+      ]
+    },
+    {
+      "query": "Founder magic and performance decrease in function when someone else takes over, scaling strategy discussed.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "-G08--_mZaU",
+      "expectedTRange": [
+        250.980010986328,
+        310.200012207031
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 265.980010986328,
+          "score": 0.53434134
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 325.540008544922,
+          "score": 0.49220163
+        },
+        {
+          "videoId": "YJy7PL2apUo",
+          "startS": 503.600006103516,
+          "score": 0.4884528
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.48184606
+        },
+        {
+          "videoId": "4J_Bo4Dbxjk",
+          "startS": 231.899993896484,
+          "score": 0.48003778
+        }
+      ]
+    },
+    {
+      "query": "Discussion on \"grass is greener\" concept and its implications.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "YJy7PL2apUo",
+      "expectedTRange": [
+        151.339996337891,
+        197.080001831055
+      ],
+      "rank": null,
+      "topHits": [
+        {
+          "videoId": "YJy7PL2apUo",
+          "startS": 503.600006103516,
+          "score": 0.5310407
+        },
+        {
+          "videoId": "OulGPT2kZ7c",
+          "startS": 248.240005493164,
+          "score": 0.50862855
+        },
+        {
+          "videoId": "IVNuDhV1uw4",
+          "startS": 493.579986572266,
+          "score": 0.5029679
+        },
+        {
+          "videoId": "LGbS0GOZBNE",
+          "startS": 325.540008544922,
+          "score": 0.50152665
+        },
+        {
+          "videoId": "4J_Bo4Dbxjk",
+          "startS": 231.899993896484,
+          "score": 0.5003302
+        }
+      ]
+    },
+    {
+      "query": "Discussion on deal flow and strategies for fundraising on a podcast.",
+      "notes": "synthetic — paraphrased from source answer",
+      "source": "synthetic",
+      "expectedVideo": "zk5jD2uko_k",
+      "expectedTRange": [
+        110.519996643066,
+        188.639999389648
+      ],
+      "rank": 1,
+      "topHits": [
+        {
+          "videoId": "zk5jD2uko_k",
+          "startS": 125.519996643066,
+          "score": 0.5092068
+        },
+        {
+          "videoId": "6WPNzaWuAic",
+          "startS": 51.7400016784668,
+          "score": 0.47239354
+        },
+        {
+          "videoId": "gMXG_HoYnRY",
+          "startS": 162.240005493164,
+          "score": 0.46920902
+        },
+        {
+          "videoId": "EjBgv-DGJ-M",
+          "startS": 33.8600006103516,
+          "score": 0.45595467
+        },
+        {
+          "videoId": "-G08--_mZaU",
+          "startS": 303.540008544922,
+          "score": 0.4516421
         }
       ]
     }

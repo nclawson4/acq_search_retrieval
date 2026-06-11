@@ -9,6 +9,15 @@ const DAILY_CAP = Number(process.env.SEARCH_DAILY_GLOBAL_CAP ?? "10000");
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 
+// Password gate for the demo. The cookie value is the literal password — we
+// don't store it server-side and don't issue tokens. Comparing strings here
+// keeps the gate stupid-simple for a single-credential demo; for any real
+// multi-user deployment, swap this for proper auth.
+// NOTE: The upfront password gate was removed — gating is now IP-count based
+// in `app/page.tsx` so anonymous visitors get 5 free searches before being
+// redirected to /login. The middleware still rate-limits the cost-driver API
+// paths.
+
 let perIp: Ratelimit | null = null;
 let dailyCap: Ratelimit | null = null;
 
@@ -36,7 +45,14 @@ function clientIp(req: NextRequest): string {
 }
 
 export async function proxy(req: NextRequest) {
-  if (!perIp || !dailyCap) return NextResponse.next();
+  const { pathname } = req.nextUrl;
+
+  // Rate-limit the cost-driver paths only (LLM/embedding-backed). The home
+  // page calls searchSessions server-side, so anonymous query counting lives
+  // in app/page.tsx and is gated against the same Redis store.
+  const isRateLimited =
+    pathname.startsWith("/api/search") || pathname.startsWith("/api/mcp");
+  if (!isRateLimited || !perIp || !dailyCap) return NextResponse.next();
 
   const ip = clientIp(req);
   const [ipResult, capResult] = await Promise.all([
@@ -81,6 +97,17 @@ export async function proxy(req: NextRequest) {
   return res;
 }
 
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 export const config = {
-  matcher: ["/api/search/:path*", "/api/mcp/:path*"],
+  // Match all paths except static assets and Next.js internals; the function
+  // itself decides whether each path needs auth, rate-limit, or both.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

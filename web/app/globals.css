@@ -24,3 +24,16 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hero animation drives the orbit via JS requestAnimationFrame for reliable
+   counter-clockwise motion + clean freeze on the collapse phase. No CSS
+   keyframes needed. */
+
+@keyframes searchProgressSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+.animate-search-progress {
+  animation: searchProgressSlide 1.1s linear infinite;
+}

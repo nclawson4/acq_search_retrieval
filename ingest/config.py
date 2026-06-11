@@ -18,6 +18,7 @@ def _required(name: str) -> str:
 
 
 OPENAI_API_KEY = _required("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 DEEPGRAM_API_KEY = _required("DEEPGRAM_API_KEY")
 QDRANT_URL = _required("QDRANT_URL")
 QDRANT_API_KEY = _required("QDRANT_API_KEY")
@@ -32,11 +33,18 @@ ALEX_REFERENCE_AUDIO = os.environ.get("ALEX_REFERENCE_AUDIO", "").strip() or Non
 QDRANT_COLLECTION_SEGMENTS = "segments"
 QDRANT_COLLECTION_FRAMES = "frames"
 QDRANT_COLLECTION_MOMENTS = "moments"
+QDRANT_COLLECTION_SESSIONS = "sessions"
 
 TEXT_EMBED_MODEL = "text-embedding-3-small"
 TEXT_EMBED_DIM = 1536
 
 CHAT_MODEL = "gpt-4o-mini"
+
+# Anthropic model for the verification-gated multi-industry tagging pipeline.
+# Reads CLAUDE_MODEL from env so operators can override per-run without code
+# changes. Sonnet is the steady-state choice — high accuracy at a price that
+# scales to corpus refreshes.
+CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
 
 CLIP_MODEL = "ViT-L-14"
 CLIP_PRETRAINED = "laion2b_s32b_b82k"

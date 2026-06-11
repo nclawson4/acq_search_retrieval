@@ -3,6 +3,7 @@ python-dotenv>=1.0.1
 psycopg[binary]>=3.2.3
 qdrant-client>=1.12.0
 openai>=1.54.0
+anthropic>=0.107.0
 
 # Ingest pipeline
 yt-dlp>=2024.11.4
