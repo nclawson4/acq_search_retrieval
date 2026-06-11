@@ -1,17 +1,16 @@
-# Workshop Q&A Clip Finder
+# Workshop Search and Retrieval Tool Long-Form Content Library
 
 A production-grade AI-native search and retrieval system over a 500+ minute long-form Q&A workshop library. A non-technical editor types something like *"med spa owners under $5M trying to scale"* and the system returns ranked, timestamped attendee sessions ready to drop into an edit.
 
 The same retrieval surface is exposed three ways: a web portal for editors, a JSON API for internal tooling, and an MCP server for AI agents.
 
 ![Demo](docs/demo.gif)
-
 ## What it costs to find one clip
 
 | | Manual editor scrubbing | This system |
 |---|---|---|
 | Time per clip | 30 to 60 minutes | 2 to 3 seconds |
-| Cost per clip | $25 to $80 (1 hr × $50 to $80 senior-editor rate) | $0.0013 (one-eighth of a cent) |
+| Cost per clip | $25 to $80 (1 hr × $50 to $80 senior-editor rate) | $0.0018 (less than two-tenths of a cent) |
 | Scales linearly with corpus | Yes (3x footage = 3x time) | No (10x footage = same latency) |
 | Repeatable for a different ICP | Start the search from scratch | Same query in seconds |
 
@@ -21,10 +20,10 @@ Concrete per-month numbers for a studio finding 100 clips:
 |---|---|---|
 | Search labor | 75 hours | 5 minutes |
 | Labor cost at $60/hr | $4,500 | $5 |
-| OpenAI inference cost | $0 | $0.13 |
+| OpenAI inference cost | $0 | $0.18 |
 | **Total** | **$4,500** | **~$5** |
 
-That is roughly a **900x latency reduction** per clip and a **34,000x cost reduction** per query, before counting opportunity cost of the editor's time on the work that actually requires a human.
+That is roughly a **900x latency reduction** per clip and a **25,000x cost reduction** per query, before counting opportunity cost of the editor's time on the work that actually requires a human.
 
 ### Per-query cost breakdown
 
@@ -34,8 +33,8 @@ At OpenAI list pricing:
 |---|---|---|---|
 | Filter extraction | `gpt-4o-mini` | 530 in / 100 out | $0.000140 |
 | Query embedding | `text-embedding-3-small` | ~30 | $0.0000006 |
-| LLM judge re-rank | `gpt-4o-mini` | ~250 in / 30 out × 20 candidates | $0.001110 |
-| **Total per query** |  | | **~$0.00125** |
+| LLM judge re-rank | `gpt-4o-mini` | ~250 in / 30 out × 30 candidates | $0.001665 |
+| **Total per query** |  | | **~$0.0018** |
 
 Vector search (Qdrant) and Postgres reads add no marginal cost. Per-query cost is logged to `query_log` in Postgres; a rolling 24-hour sum drives the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
 
@@ -131,8 +130,12 @@ NL query
 [2] embed (text-embedding-3-small over residualText OR raw query)
    |
    v
-[3] Qdrant search with hard payload filter on industry/revenue/gender/topics
-   | topK = 20 candidates
+[3] Qdrant search with hard payload filter on revenue/gender. Industry and
+   | topics are SOFT — the extractor's guesses no longer gate the candidate
+   | pool, only an editor's explicit UI dropdown pick does. This keeps
+   | general queries ("service-based businesses") from being silently
+   | hard-filtered down to one of 20 industry slugs.
+   | topK = 30 candidates
    v
 [4] LLM judge pass (gpt-4o-mini) scores each candidate 0..1
    | for "is this what the editor asked for"

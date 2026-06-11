@@ -10,7 +10,7 @@ import type { Gender, Industry, RevenueBand, Topic } from "./taxonomy";
 
 const COLLECTION_SESSIONS = "sessions";
 const OVERFETCH = 20;
-const JUDGE_INPUT_LIMIT = 20;
+const JUDGE_INPUT_LIMIT = 30;
 const RELEVANCE_FLOOR = 0.5;
 
 export interface SessionHit {
@@ -76,19 +76,22 @@ export async function searchSessions(
     usage = addUsage(usage, x.usage);
   }
 
-  // Merge explicit (UI chips) with extracted (LLM): explicit wins. For
-  // revenue, an editor's single-band pick from the UI dropdown supersedes
-  // any range the LLM extracted from text.
-  const industry = explicit.industry ?? extracted.industry ?? null;
+  // Filter posture: industry and topics are SOFT signals — applied as hard
+  // Qdrant filters only when the editor explicitly picked them from the UI.
+  // The LLM extractor's industry/topic guesses are kept on `extracted` for
+  // UI display and downstream judge context, but never gate the candidate
+  // pool. This avoids the "service-based businesses" failure mode where the
+  // extractor deterministically picks one of 20 industries, hard-filters the
+  // pool to that slice, and the judge nukes the survivors. Revenue band and
+  // gender stay hard because they're structured and unambiguous.
+  const hardIndustry = explicit.industry ?? null;
   const revenueBands =
     explicit.revenueBands && explicit.revenueBands.length > 0
       ? explicit.revenueBands
       : extracted.revenueBands;
   const gender = explicit.gender ?? extracted.gender ?? null;
-  const topics =
-    explicit.topics && explicit.topics.length > 0
-      ? explicit.topics
-      : extracted.topics;
+  const hardTopics =
+    explicit.topics && explicit.topics.length > 0 ? explicit.topics : [];
 
   // 2. Build the embedding query. Prefer residual_text when present
   // (filter-mapped phrases stripped); fall back to raw query.
@@ -107,11 +110,11 @@ export async function searchSessions(
   // tagged primary=health_and_wellness + secondary=e_commerce surfaces in
   // both searches, with the primary listed first on the card.
   const must: Array<Record<string, unknown>> = [];
-  if (industry) {
+  if (hardIndustry) {
     must.push({
       should: [
-        { key: "industry", match: { value: industry } },
-        { key: "secondary_industries", match: { any: [industry] } },
+        { key: "industry", match: { value: hardIndustry } },
+        { key: "secondary_industries", match: { any: [hardIndustry] } },
       ],
     });
   }
@@ -119,8 +122,8 @@ export async function searchSessions(
     must.push({ key: "revenue_band", match: { any: revenueBands } });
   }
   if (gender) must.push({ key: "attendee_gender", match: { value: gender } });
-  if (topics && topics.length > 0) {
-    must.push({ key: "topics", match: { any: topics } });
+  if (hardTopics.length > 0) {
+    must.push({ key: "topics", match: { any: hardTopics } });
   }
   const filter = must.length > 0 ? { must } : undefined;
 

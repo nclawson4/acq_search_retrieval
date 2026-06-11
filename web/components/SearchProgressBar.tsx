@@ -10,7 +10,11 @@ const STAGES = [
   "Finalizing top matches",
 ];
 
-const STAGE_MS = 650;
+// Per-stage hold durations. Earlier stages dwell longer so the bar paces
+// roughly with the real pipeline (~3.3s total), instead of racing through
+// the first four and then stalling on "Finalizing" while the judge runs.
+// Stage 4 has no entry — it holds until the page navigation arrives.
+const STAGE_MS = [900, 800, 750, 1000];
 
 export default function SearchProgressBar() {
   const [pending, setPending] = useState(false);
@@ -32,7 +36,8 @@ export default function SearchProgressBar() {
   useEffect(() => {
     if (!pending) return;
     if (stageIdx >= STAGES.length - 1) return;
-    const t = setTimeout(() => setStageIdx((p) => p + 1), STAGE_MS);
+    const hold = STAGE_MS[stageIdx] ?? 800;
+    const t = setTimeout(() => setStageIdx((p) => p + 1), hold);
     return () => clearTimeout(t);
   }, [pending, stageIdx]);
 
