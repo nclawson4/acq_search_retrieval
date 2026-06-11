@@ -1,4 +1,4 @@
-# Workshop Search and Retrieval Tool Long-Form Content Library
+# Search and Retrieval Tool Long-Form Content Library
 
 A production-grade AI-native search and retrieval system over a 500+ minute long-form Q&A workshop library. A non-technical editor types something like *"med spa owners under $5M trying to scale"* and the system returns ranked, timestamped attendee sessions ready to drop into an edit.
 
