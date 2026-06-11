@@ -1,5 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import ExamplePill from "@/components/ExamplePill";
 import HeroAnimation from "@/components/HeroAnimation";
 import MobileHeroAnimation from "@/components/MobileHeroAnimation";
 import SearchProgressBar from "@/components/SearchProgressBar";
@@ -276,12 +277,7 @@ export default async function Home({
             <ul className="flex flex-wrap gap-2">
               {EXAMPLES.map((eq) => (
                 <li key={eq}>
-                  <a
-                    href={`/?q=${encodeURIComponent(eq)}`}
-                    className="inline-block rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs hover:border-zinc-500 dark:hover:border-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
-                  >
-                    {eq}
-                  </a>
+                  <ExamplePill query={eq} />
                 </li>
               ))}
             </ul>
