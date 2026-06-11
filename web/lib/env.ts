@@ -19,7 +19,11 @@ export const SEARCH_RATE_LIMIT_PER_MIN = Number(
 export const SEARCH_DAILY_GLOBAL_CAP = Number(
   process.env.SEARCH_DAILY_GLOBAL_CAP ?? "10000",
 );
-export const MCP_TOKEN = process.env.MCP_TOKEN ?? "";
+// Public demo token. This is hard-coded as a fallback because the project is
+// a portfolio demo and the same string is already published in the README and
+// powers the /login flow. For any real deployment, set the MCP_TOKEN env var
+// to a private value and this fallback is bypassed.
+export const MCP_TOKEN = process.env.MCP_TOKEN || "demo2026";
 
 // Internal/dev-only routes (eval dashboard, per-video debug page, eval API,
 // MCP endpoint). Gated behind an env var so the public deploy doesn't expose
