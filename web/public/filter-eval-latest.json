@@ -1,0 +1,617 @@
+{
+  "ranAt": "2026-06-15T19:08:51.773Z",
+  "extraction": {
+    "rows": [
+      {
+        "query": "med spa owners",
+        "expected": {
+          "industry": "health_and_wellness",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "health_and_wellness",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "DTC brand founders on Shopify",
+        "expected": {
+          "industry": "e_commerce",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "e_commerce",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "marketing agency owners",
+        "expected": {
+          "industry": "agency",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "agency",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "HVAC contractors",
+        "expected": {
+          "industry": "home_services",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "home_services",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "law firm partners",
+        "expected": {
+          "industry": "professional_services",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "professional_services",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "pizza shop owners",
+        "expected": {
+          "industry": "food_and_beverage",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "food_and_beverage",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "real estate brokers",
+        "expected": {
+          "industry": "real_estate",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "real_estate",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "SaaS founders",
+        "expected": {
+          "industry": "saas_and_software",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "saas_and_software",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "general contractors building custom homes",
+        "expected": {
+          "industry": "construction_and_trades",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "construction_and_trades",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "course creators and podcasters",
+        "expected": {
+          "industry": "creator_and_media",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "creator_and_media",
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "business owners under $5M",
+        "expected": {
+          "industry": null,
+          "revenueBands": [
+            "<$1M",
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [
+            "<$1M",
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "founders doing over $1M",
+        "expected": {
+          "industry": null,
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M",
+            "$25M+"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M",
+            "$25M+"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "agencies doing $3M to $10M",
+        "expected": {
+          "industry": "agency",
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": "agency",
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "business owners over $50M",
+        "expected": {
+          "industry": null,
+          "revenueBands": [
+            "$25M+"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [
+            "$25M+"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "around $3M in revenue",
+        "expected": {
+          "industry": null,
+          "revenueBands": [
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "female founders",
+        "expected": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": "female",
+          "topics": []
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": "female",
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "young male restaurant owners",
+        "expected": {
+          "industry": "food_and_beverage",
+          "revenueBands": [],
+          "gender": "male",
+          "topics": []
+        },
+        "actual": {
+          "industry": "food_and_beverage",
+          "revenueBands": [],
+          "gender": "male",
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "owners dealing with churn",
+        "expected": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "customer_retention_and_churn"
+          ]
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "customer_retention_and_churn"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "hiring their first sales team",
+        "expected": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "sales_team_building"
+          ]
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "hiring_and_firing",
+            "sales_team_building"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 0.5,
+        "topicsRecall": 1
+      },
+      {
+        "query": "businesses raising prices",
+        "expected": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "pricing_strategy"
+          ]
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": []
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 0
+      },
+      {
+        "query": "founders raising capital from investors",
+        "expected": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "raising_capital"
+          ]
+        },
+        "actual": {
+          "industry": null,
+          "revenueBands": [],
+          "gender": null,
+          "topics": [
+            "raising_capital"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "med spa owners doing under $5M with churn problems",
+        "expected": {
+          "industry": "health_and_wellness",
+          "revenueBands": [
+            "<$1M",
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": [
+            "customer_retention_and_churn"
+          ]
+        },
+        "actual": {
+          "industry": "health_and_wellness",
+          "revenueBands": [
+            "<$1M",
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": [
+            "customer_retention_and_churn"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "male agency owners over $1M hiring their first sales team",
+        "expected": {
+          "industry": "agency",
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M",
+            "$25M+"
+          ],
+          "gender": "male",
+          "topics": [
+            "sales_team_building"
+          ]
+        },
+        "actual": {
+          "industry": "agency",
+          "revenueBands": [
+            "$1-5M",
+            "$5-25M",
+            "$25M+"
+          ],
+          "gender": "male",
+          "topics": [
+            "sales_team_building"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "female ecommerce founders raising capital",
+        "expected": {
+          "industry": "e_commerce",
+          "revenueBands": [],
+          "gender": "female",
+          "topics": [
+            "raising_capital"
+          ]
+        },
+        "actual": {
+          "industry": "e_commerce",
+          "revenueBands": [],
+          "gender": "female",
+          "topics": [
+            "raising_capital"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      },
+      {
+        "query": "home services owners around $1-5M dealing with sales process issues",
+        "expected": {
+          "industry": "home_services",
+          "revenueBands": [
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": [
+            "sales_process_and_closing"
+          ]
+        },
+        "actual": {
+          "industry": "home_services",
+          "revenueBands": [
+            "$1-5M"
+          ],
+          "gender": null,
+          "topics": [
+            "sales_process_and_closing"
+          ]
+        },
+        "industryCorrect": true,
+        "revenueBandsCorrect": true,
+        "genderCorrect": true,
+        "topicsPrecision": 1,
+        "topicsRecall": 1
+      }
+    ],
+    "summary": {
+      "total": 25,
+      "industryAccuracy": 1,
+      "revenueBandsAccuracy": 1,
+      "genderAccuracy": 1,
+      "topicsPrecision": 0.98,
+      "topicsRecall": 0.96,
+      "topicsF1": 0.9698969072164948,
+      "allFieldsCorrect": 23
+    }
+  },
+  "fidelity": {
+    "revenue": {
+      "applicable": 11,
+      "matched": 11,
+      "rate": 1
+    },
+    "gender": {
+      "applicable": 3,
+      "matched": 3,
+      "rate": 1
+    },
+    "industry": {
+      "applicable": 17,
+      "matched": 12,
+      "rate": 0.7058823529411765
+    },
+    "topics": {
+      "applicable": 8,
+      "matched": 7,
+      "rate": 0.875
+    },
+    "totalHitsEvaluated": 20
+  }
+}

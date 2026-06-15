@@ -70,7 +70,7 @@ async function main() {
   // Two-pass gif with palette for clean colors at smaller size.
   const paletteFile = resolve(VIDEO_DIR, "palette.png");
   const fps = 15;
-  // Scale width to 1100 (preserve AR) — keeps GIF under ~6MB for README.
+  // Scale width to 1100 (preserve AR). Keeps GIF under ~6MB for README.
   const filters = `fps=${fps},scale=1100:-1:flags=lanczos`;
 
   console.log("Generating palette...");

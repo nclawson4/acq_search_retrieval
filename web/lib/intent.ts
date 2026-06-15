@@ -15,7 +15,7 @@ export interface QueryIntent {
 
 const EMPTY: QueryIntent = { industries: [], problems: [], revenueBand: null };
 
-const SYSTEM = `You extract structured filters from a search query against a video library of business workshop Q&A (attendee question + Alex Hormozi answer). Each moment was tagged at ingest time with: industry (short noun phrase the attendee used for their business — e.g. "med spa", "marketing agency", "dental practice"), revenue_band, and zero or more problem tags.
+const SYSTEM = `You extract structured filters from a search query against a video library of business workshop Q&A (attendee question + Alex Hormozi answer). Each moment was tagged at ingest time with: industry (short noun phrase the attendee used for their business, e.g. "med spa", "marketing agency", "dental practice"), revenue_band, and zero or more problem tags.
 
 Output JSON only:
 {
@@ -25,7 +25,7 @@ Output JSON only:
 }
 
 Rules:
-- industries: if the query targets a business type or persona, return 3-8 short noun phrases an attendee in that sector might use to describe their business — cast a wide net across the sector. E.g. "healthcare founder" -> ["med spa","dental practice","chiropractic clinic","clinic","medical practice","veterinary clinic","wellness","physical therapy"]. "agency owner" -> ["marketing agency","advertising agency","creative agency","digital agency","pr agency"]. Empty array if the query has no persona/industry.
+- industries: if the query targets a business type or persona, return 3-8 short noun phrases an attendee in that sector might use to describe their business; cast a wide net across the sector. E.g. "healthcare founder" -> ["med spa","dental practice","chiropractic clinic","clinic","medical practice","veterinary clinic","wellness","physical therapy"]. "agency owner" -> ["marketing agency","advertising agency","creative agency","digital agency","pr agency"]. Empty array if the query has no persona/industry.
 - problems: zero or more tags from this EXACT set, only if the query is clearly about that topic: ${JSON.stringify([...PROBLEM_TAGS])}. Empty array if unclear.
 - revenue_band: one of ${JSON.stringify([...REVENUE_BANDS])} if the query specifies a revenue size; otherwise null.
 

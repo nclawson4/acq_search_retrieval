@@ -10,7 +10,7 @@ import {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mobile-only hero animation. Single column. Sequence per query:
-//   1. Before pane visible — types keyword, shows cluttered "too many" results
+//   1. Before pane visible: types keyword, shows cluttered "too many" results
 //   2. Slides horizontally to the After pane
 //   3. After pane types natural-language query, thumbnail + callouts materialize
 //   4. Slides back to Before pane with the NEXT query
@@ -103,7 +103,7 @@ export default function MobileHeroAnimation() {
     elapsed >= BEFORE_TYPE_END && elapsed < BEFORE_SEARCH_END;
   const beforeShowResult = elapsed >= BEFORE_SEARCH_END;
 
-  // After-pane typing — starts during the slide so the bar already has text
+  // After-pane typing: starts during the slide so the bar already has text
   // when it lands in view
   let rightTyped = "";
   if (elapsed < SLIDE_TO_AFTER_END) {
@@ -319,7 +319,7 @@ function MobileBeforePane({
               <>
                 <div className="rounded-md px-2 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/70 mb-1">
                   <div className="font-semibold text-[10px]">
-                    {query.keywordResultCount} matches — too many
+                    {query.keywordResultCount} matches, too many
                   </div>
                 </div>
                 <div className="space-y-[2px] mt-0.5">
@@ -375,7 +375,7 @@ function MobileAfterPane({
   showChips: boolean;
 }) {
   // Free-floating layout: search bar, then thumbnail, then chips in a flex
-  // row, then a CTA. NO containing card/box — every element sits on the page
+  // row, then a CTA. NO containing card/box. Every element sits on the page
   // background. No SVG connector lines (they were what implied "labels for the
   // thumb" but were also what was getting clipped on narrow mobile).
   return (
@@ -471,7 +471,7 @@ function MobileAfterPane({
         </div>
       )}
 
-      {/* Chips — flex row distributed across the pane width, can NEVER
+      {/* Chips: flex row distributed across the pane width, can NEVER
           overflow because each chip is constrained to its slot's width and
           they sit between left-2 and right-2. */}
       <div

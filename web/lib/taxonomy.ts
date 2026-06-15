@@ -1,4 +1,4 @@
-// Mirror of ingest/topics.py. Keep these arrays in sync — both sides must agree
+// Mirror of ingest/topics.py. Keep these arrays in sync. Both sides must agree
 // on the closed-set vocabulary used at tagging time and search time.
 
 export const TOPICS = [
@@ -33,7 +33,7 @@ export const TOPICS = [
 export const TOPIC_LABELS: Record<string, string> = {
   lead_generation: "Lead generation (paid, inbound, outbound)",
   sales_process_and_closing: "Sales process & closing",
-  sales_team_building: "Sales team — hiring, training, comp",
+  sales_team_building: "Sales team: hiring, training, comp",
   customer_retention_and_churn: "Customer retention & churn",
   marketing_attribution: "Marketing attribution & measurement",
   pricing_strategy: "Pricing strategy",

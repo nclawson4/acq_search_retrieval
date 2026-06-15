@@ -1,6 +1,6 @@
 // LLM-as-judge re-ranker. For each candidate session, the judge scores how
 // well the session ACTUALLY matches the editor's intent (not just word/topic
-// overlap). This is the step that kills topic-search false positives — the
+// overlap). This is the step that kills topic-search false positives, the
 // failure mode where semantic similarity surfaces a conversation that mentions
 // the topic but isn't really about it.
 
@@ -22,7 +22,7 @@ export interface JudgedResult {
 
 const SYSTEM = `You are scoring search results for a media editor. They will
 get a list of Q&A workshop sessions and need each one to actually be about the
-thing they asked for — not just tangentially mention it.
+thing they asked for, not just tangentially mention it.
 
 Score each candidate 0.0 to 1.0:
   - 1.0: the conversation is directly about the editor's ask

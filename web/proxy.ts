@@ -9,11 +9,11 @@ const DAILY_CAP = Number(process.env.SEARCH_DAILY_GLOBAL_CAP ?? "10000");
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 
-// Password gate for the demo. The cookie value is the literal password — we
+// Password gate for the demo. The cookie value is the literal password. We
 // don't store it server-side and don't issue tokens. Comparing strings here
 // keeps the gate stupid-simple for a single-credential demo; for any real
 // multi-user deployment, swap this for proper auth.
-// NOTE: The upfront password gate was removed — gating is now IP-count based
+// NOTE: The upfront password gate was removed. Gating is now IP-count based
 // in `app/page.tsx` so anonymous visitors get 5 free searches before being
 // redirected to /login. The middleware still rate-limits the cost-driver API
 // paths.

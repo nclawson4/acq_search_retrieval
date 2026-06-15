@@ -11,7 +11,7 @@ export function openai() {
 export const CHAT_MODEL = "gpt-4o-mini";
 
 // Pricing per 1M tokens for gpt-4o-mini (input / output). Used for per-query
-// cost telemetry — accuracy is "close enough for an internal usage cap".
+// cost telemetry. Accuracy is "close enough for an internal usage cap".
 export const CHAT_PRICE_INPUT_PER_M = 0.15;
 export const CHAT_PRICE_OUTPUT_PER_M = 0.60;
 export const EMBED_PRICE_PER_M = 0.02;

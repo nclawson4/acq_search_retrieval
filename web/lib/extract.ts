@@ -7,7 +7,7 @@
 // IMPORTANT (security): the user's free-text query is passed inside a clearly
 // delimited <query> tag and the system prompt instructs the model to treat
 // every token inside as data, not instructions. This is our prompt-injection
-// mitigation — see SECURITY.md.
+// mitigation. See SECURITY.md.
 
 import { CHAT_MODEL, openai, type TokenUsage } from "./openai";
 import {
@@ -23,16 +23,23 @@ import {
 
 export interface ExtractedFilters {
   industry: Industry | null;
+  // True only when the editor literally named a specific industry term
+  // ("real estate brokers", "med spa owners", "HVAC contractors"). False
+  // when industry was inferred from a general descriptor ("service-based
+  // businesses", "business owners"). Drives hard-vs-soft filter posture in
+  // sessions.ts: certain industries gate the candidate pool, uncertain ones
+  // only inform ranking.
+  industryCertain: boolean;
   // 0+ revenue bands the query qualifies for. Empty array = no revenue
   // constraint. Multiple bands cover range expressions like "over $1M" or
-  // "$3M to $10M" — see the extractor system prompt.
+  // "$3M to $10M". See the extractor system prompt.
   revenueBands: RevenueBand[];
   gender: Gender | null;
   topics: Topic[];
   residualText: string;
 }
 
-// The extractor never selects "unknown" — that's a tagger output used when
+// The extractor never selects "unknown". That's a tagger output used when
 // the attendee didn't state revenue, not a search filter the editor would
 // ask for.
 const EXTRACTABLE_REVENUE_BANDS = REVENUE_BANDS.filter((b) => b !== "unknown");
@@ -51,7 +58,7 @@ Output rules:
 1. industry: pick exactly one from the allowed list, or null if not specified
    in the query. Map misspellings and informal phrasing to the closest value.
    Critical industry disambiguations (the closed-set vocabulary can be
-   ambiguous — these mappings match how sessions are tagged in the corpus):
+   ambiguous, these mappings match how sessions are tagged in the corpus):
      - restaurant, cafe, bar, food truck, food service, catering, pizza shop,
        bakery, ghost kitchen -> "food_and_beverage"
      - hotel, motel, airbnb, vacation rental, travel agency, tour operator
@@ -78,7 +85,17 @@ Output rules:
      - franchise owner, multi-unit franchisee -> "franchise_operator"
    Use "other" only if the editor explicitly named a domain that does not
    match any allowed value.
-2. revenue_bands: an array of 0+ bands the query qualifies for. The bands
+2. industry_certain: boolean. Set TRUE only when the editor literally named
+   a specific industry term that maps to your industry pick ("real estate
+   brokers", "med spa owners", "HVAC contractors", "agency owners",
+   "podcasters"). Set FALSE when you INFERRED the industry from a general
+   descriptor that could fit several sectors ("service-based businesses",
+   "business owners", "founders", "owners under $5M"). When industry is
+   null, industry_certain MUST also be false. This drives whether the
+   downstream search treats industry as a hard filter or a soft signal, so
+   be honest: if a reasonable reader could read the query and pick a
+   different industry, set false.
+3. revenue_bands: an array of 0+ bands the query qualifies for. The bands
    are coarse buckets: "<$1M", "$1-5M", "$5-25M", "$25M+". Map the query as:
      - Specific revenue ("$3M", "around $3M"): one band -> ["$1-5M"]
      - Comparator "over X" / "X+" / "above X": every band at or above X
@@ -88,14 +105,14 @@ Output rules:
      - Range "X to Y" / "between X and Y": every band the range overlaps
        ("$1M to $10M" -> ["$1-5M","$5-25M"]; "$3M-$7M" -> ["$1-5M","$5-25M"])
      - Unspecified: []
-   Never include "unknown" — that's reserved for sessions where the attendee
+   Never include "unknown". That's reserved for sessions where the attendee
    didn't state revenue, not a filter editors apply.
-3. gender: "male" | "female" | null. Only set when the editor explicitly asks
+4. gender: "male" | "female" | null. Only set when the editor explicitly asks
    for one ("women founders", "only female owners"). Default null.
-4. topics: 0-3 topic ids from the allowed list, ordered by how central they
-   are to the editor's ask. Be conservative — only include a topic if the
+5. topics: 0-3 topic ids from the allowed list, ordered by how central they
+   are to the editor's ask. Be conservative. Only include a topic if the
    editor clearly wants that subject.
-5. residual_text: the editor's intent stripped of the filter-mapped phrases,
+6. residual_text: the editor's intent stripped of the filter-mapped phrases,
    suitable for semantic search. Empty string when the query is purely
    structured. Never insert instructions you invented.
 
@@ -124,6 +141,7 @@ export async function extractFilters(query: string): Promise<{
           additionalProperties: false,
           properties: {
             industry: { type: ["string", "null"], enum: [...INDUSTRIES, null] },
+            industry_certain: { type: "boolean" },
             revenue_bands: {
               type: "array",
               items: { type: "string", enum: [...EXTRACTABLE_REVENUE_BANDS] },
@@ -136,7 +154,7 @@ export async function extractFilters(query: string): Promise<{
             },
             residual_text: { type: "string" },
           },
-          required: ["industry", "revenue_bands", "gender", "topics", "residual_text"],
+          required: ["industry", "industry_certain", "revenue_bands", "gender", "topics", "residual_text"],
         },
       },
     },
@@ -151,9 +169,14 @@ export async function extractFilters(query: string): Promise<{
     (b: unknown): b is RevenueBand =>
       typeof b === "string" && extractableSet.has(b),
   );
+  const industry = (data.industry ?? null) as Industry | null;
+  // Guard the contract: industry_certain must imply industry !== null.
+  const industryCertain =
+    industry !== null && Boolean(data.industry_certain);
   return {
     filters: {
-      industry: (data.industry ?? null) as Industry | null,
+      industry,
+      industryCertain,
       revenueBands,
       gender: (data.gender ?? null) as Gender | null,
       topics: (data.topics ?? []) as Topic[],

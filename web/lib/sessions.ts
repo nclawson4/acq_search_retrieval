@@ -67,7 +67,7 @@ export async function searchSessions(
   let extracted: ExtractedFilters;
   if (rawQuery.length === 0) {
     extracted = {
-      industry: null, revenueBands: [], gender: null,
+      industry: null, industryCertain: false, revenueBands: [], gender: null,
       topics: [], residualText: "",
     };
   } else {
@@ -76,15 +76,22 @@ export async function searchSessions(
     usage = addUsage(usage, x.usage);
   }
 
-  // Filter posture: industry and topics are SOFT signals — applied as hard
-  // Qdrant filters only when the editor explicitly picked them from the UI.
-  // The LLM extractor's industry/topic guesses are kept on `extracted` for
-  // UI display and downstream judge context, but never gate the candidate
-  // pool. This avoids the "service-based businesses" failure mode where the
-  // extractor deterministically picks one of 20 industries, hard-filters the
-  // pool to that slice, and the judge nukes the survivors. Revenue band and
-  // gender stay hard because they're structured and unambiguous.
-  const hardIndustry = explicit.industry ?? null;
+  // Filter posture for industry:
+  //   - Explicit UI dropdown pick: always hard. The editor opted in.
+  //   - Extractor pick with industry_certain=true: hard. The editor literally
+  //     named a specific industry term ("real estate brokers", "med spa
+  //     owners"), so cross-domain results are noise, not signal.
+  //   - Extractor pick with industry_certain=false: soft. The editor used a
+  //     general descriptor ("service-based businesses", "founders"), so the
+  //     extractor's guess is an approximation. Letting it gate the pool would
+  //     silently narrow general queries down to one of 20 industry slugs.
+  //
+  // Topics remain soft signals (only hard when the UI passes them). Revenue
+  // and gender are always hard when extracted — they're structured and
+  // unambiguous.
+  const hardIndustry =
+    explicit.industry ??
+    (extracted.industry && extracted.industryCertain ? extracted.industry : null);
   const revenueBands =
     explicit.revenueBands && explicit.revenueBands.length > 0
       ? explicit.revenueBands
@@ -106,7 +113,7 @@ export async function searchSessions(
   }
 
   // 3. Hard filter via Qdrant. Industry matches the primary OR any of the
-  // verified secondaries — a hair-extension business primarily on wholesale
+  // verified secondaries. A hair-extension business primarily on wholesale
   // tagged primary=health_and_wellness + secondary=e_commerce surfaces in
   // both searches, with the primary listed first on the card.
   const must: Array<Record<string, unknown>> = [];
@@ -138,7 +145,7 @@ export async function searchSessions(
     });
     points = resp.points as typeof points;
   } else {
-    // No semantic text — scroll filtered sessions ordered by id.
+    // No semantic text. Scroll filtered sessions ordered by id.
     const resp = await qdrant().scroll(COLLECTION_SESSIONS, {
       filter,
       limit: k * OVERFETCH,
@@ -200,7 +207,7 @@ export async function searchSessions(
 
   // 6. Run the LLM judge on the top OVERFETCH; only if the editor asked
   // something specific (semantic text present). If no semantic text and
-  // only filters were used, skip the judge — chips speak for themselves.
+  // only filters were used, skip the judge. Chips speak for themselves.
   let judged: Record<string | number, { score: number; reason: string }> = {};
   if (semanticText.length > 0 && points.length > 0) {
     const candidates = points.slice(0, JUDGE_INPUT_LIMIT).map((p) => {
@@ -255,7 +262,7 @@ export async function searchSessions(
       semanticScore: typeof p.score === "number" ? p.score : 0,
       judgeScore,
       reason,
-      // 1s preroll — enough headroom for YouTube's keyframe seek without the
+      // 1s preroll: enough headroom for YouTube's keyframe seek without the
       // perceptible "started early" gap.
       playUrl: appendTimestamp(vid.url, Math.max(0, startS - 1)),
     });
@@ -302,7 +309,7 @@ export async function searchSessions(
 
   // Same-video, same-person collapse. When segmentation produces two sessions
   // of the same attendee inside one long video (a brief Alex/other turn split
-  // them), don't surface both — the editor wants the one that encapsulates
+  // them), don't surface both. The editor wants the one that encapsulates
   // more of that person. Rule: same video_id + same attendee_cluster_id,
   // drop all but the longest-duration session. The longer form's transcript
   // covers the shorter form's content by construction.
@@ -311,7 +318,7 @@ export async function searchSessions(
     const meta = videoByS.get(h.sessionId);
     const cid = meta?.attendeeClusterId;
     if (cid == null) {
-      // Shorts have null cluster id (single attendee per video) — keep as-is.
+      // Shorts have null cluster id (single attendee per video). Keep as-is.
       const key = `solo:${h.sessionId}`;
       longestByPerson.set(key, h);
       continue;

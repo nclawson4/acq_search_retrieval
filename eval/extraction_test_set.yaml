@@ -1,0 +1,177 @@
+# Hand-labeled extraction test set.
+#
+# Each entry is a natural-language query an editor might type, paired with the
+# filters a human reviewer says the system *should* extract. The eval script
+# (web/scripts/filter_eval.ts) runs every query through lib/extract.ts and
+# grades the output against these labels.
+#
+# Coverage targets:
+#   - All major industry disambiguations called out in the extractor prompt
+#   - Every revenue range expression form (under, over, range, specific, "$X+")
+#   - Gender (male, female, omitted)
+#   - The most common topics editors search for
+#   - Multi-constraint combinations (industry + revenue + gender + topic)
+#
+# Conventions:
+#   - industry: a single taxonomy id, or null if the query doesn't specify
+#   - revenue_bands: the SET of bands the query qualifies for (order ignored)
+#   - gender: "male" | "female" | null
+#   - topics: the SET of topics a strict reading of the query justifies. Be
+#     CONSERVATIVE. Only include a topic if the query unambiguously asks for
+#     that subject. The extractor is instructed to be conservative too.
+
+tests:
+  # Industry disambiguations
+  - query: "med spa owners"
+    industry: "health_and_wellness"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "DTC brand founders on Shopify"
+    industry: "e_commerce"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "marketing agency owners"
+    industry: "agency"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "HVAC contractors"
+    industry: "home_services"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "law firm partners"
+    industry: "professional_services"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "pizza shop owners"
+    industry: "food_and_beverage"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "real estate brokers"
+    industry: "real_estate"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "SaaS founders"
+    industry: "saas_and_software"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "general contractors building custom homes"
+    industry: "construction_and_trades"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  - query: "course creators and podcasters"
+    industry: "creator_and_media"
+    revenue_bands: []
+    gender: null
+    topics: []
+
+  # Revenue range expressions
+  - query: "business owners under $5M"
+    industry: null
+    revenue_bands: ["<$1M", "$1-5M"]
+    gender: null
+    topics: []
+
+  - query: "founders doing over $1M"
+    industry: null
+    revenue_bands: ["$1-5M", "$5-25M", "$25M+"]
+    gender: null
+    topics: []
+
+  - query: "agencies doing $3M to $10M"
+    industry: "agency"
+    revenue_bands: ["$1-5M", "$5-25M"]
+    gender: null
+    topics: []
+
+  - query: "business owners over $50M"
+    industry: null
+    revenue_bands: ["$25M+"]
+    gender: null
+    topics: []
+
+  - query: "around $3M in revenue"
+    industry: null
+    revenue_bands: ["$1-5M"]
+    gender: null
+    topics: []
+
+  # Gender
+  - query: "female founders"
+    industry: null
+    revenue_bands: []
+    gender: "female"
+    topics: []
+
+  - query: "young male restaurant owners"
+    industry: "food_and_beverage"
+    revenue_bands: []
+    gender: "male"
+    topics: []
+
+  # Topics
+  - query: "owners dealing with churn"
+    industry: null
+    revenue_bands: []
+    gender: null
+    topics: ["customer_retention_and_churn"]
+
+  - query: "hiring their first sales team"
+    industry: null
+    revenue_bands: []
+    gender: null
+    topics: ["sales_team_building"]
+
+  - query: "businesses raising prices"
+    industry: null
+    revenue_bands: []
+    gender: null
+    topics: ["pricing_strategy"]
+
+  - query: "founders raising capital from investors"
+    industry: null
+    revenue_bands: []
+    gender: null
+    topics: ["raising_capital"]
+
+  # Multi-constraint combinations
+  - query: "med spa owners doing under $5M with churn problems"
+    industry: "health_and_wellness"
+    revenue_bands: ["<$1M", "$1-5M"]
+    gender: null
+    topics: ["customer_retention_and_churn"]
+
+  - query: "male agency owners over $1M hiring their first sales team"
+    industry: "agency"
+    revenue_bands: ["$1-5M", "$5-25M", "$25M+"]
+    gender: "male"
+    topics: ["sales_team_building"]
+
+  - query: "female ecommerce founders raising capital"
+    industry: "e_commerce"
+    revenue_bands: []
+    gender: "female"
+    topics: ["raising_capital"]
+
+  - query: "home services owners around $1-5M dealing with sales process issues"
+    industry: "home_services"
+    revenue_bands: ["$1-5M"]
+    gender: null
+    topics: ["sales_process_and_closing"]

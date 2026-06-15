@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hero — split "Before / After" with no fade between cycles. The query text is
+// Hero: split "Before / After" with no fade between cycles. The query text is
 // backspaced character-by-character, then the next query is typed in. The
 // previous result stays on screen during edit (mimics real editor behavior).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -197,7 +197,7 @@ export default function HeroAnimation() {
   const curr = QUERIES[idx];
   const prev = QUERIES[(idx - 1 + QUERIES.length) % QUERIES.length];
 
-  // Search-box text — backspace then retype
+  // Search-box text: backspace then retype
   let leftTyped: string;
   let rightTyped: string;
   if (phase === "backspace") {
@@ -225,7 +225,7 @@ export default function HeroAnimation() {
     rightTyped = curr.naturalQuery;
   }
 
-  // The displayed result is the PREVIOUS query while the user is editing —
+  // The displayed result is the PREVIOUS query while the user is editing.
   // the file explorer / right pane still shows the stale prior search. Only
   // when "search" → "show" do we swap to the new query's result.
   const displayed = phase === "show" ? curr : prev;
@@ -369,7 +369,7 @@ function BeforePane({
               <>
                 <div className="rounded-md px-2 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/70 mb-1">
                   <div className="font-semibold text-[10px]">
-                    {query.keywordResultCount} matches — too many
+                    {query.keywordResultCount} matches, too many
                   </div>
                 </div>
                 <div className="space-y-[2px] mt-0.5">
@@ -439,7 +439,7 @@ function AfterPane({
   showSearching: boolean;
 }) {
   // Chips in three evenly-spaced slots below the thumb. Lines drop straight
-  // down from the thumb's bottom edge to the chip top — cleanest possible
+  // down from the thumb's bottom edge to the chip top. Cleanest possible
   // connector since the chip cx equals the thumb anchor tx.
   const CHIP_ROW_Y = 290;
   const SLOT_FRACTIONS = [0.18, 0.5, 0.82];
@@ -607,7 +607,7 @@ function AfterPane({
           </div>
         )}
 
-        {/* Try this query CTA — submits the hero search form with the
+        {/* Try this query CTA: submits the hero search form with the
             currently-displayed natural-language query. Uses requestSubmit so
             the SearchProgressBar's submit listener fires. */}
         <button
@@ -622,7 +622,7 @@ function AfterPane({
             ) as HTMLInputElement | null;
             if (input) input.value = query.naturalQuery;
             // Reset filter selects so the natural-language extractor drives
-            // them — otherwise stale filter selections from a prior search
+            // them, otherwise stale filter selections from a prior search
             // would override what the query implies.
             form.querySelectorAll("select").forEach((sel) => {
               (sel as HTMLSelectElement).value = "";

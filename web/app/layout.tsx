@@ -19,7 +19,7 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://acq-search-v1.vercel.app"),
-  title: { default: APP_NAME, template: `%s — ${APP_NAME}` },
+  title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
   description: DESCRIPTION,
   openGraph: {
     title: APP_NAME,

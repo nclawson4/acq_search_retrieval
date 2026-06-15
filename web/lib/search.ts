@@ -28,7 +28,7 @@ export interface SearchHit {
   clipScore: number | null;
   frameUrl: string | null;
   // YouTube link timestamped to the start of the matched side (answer if
-  // matchedKind=answer, question otherwise) — first seconds of playback
+  // matchedKind=answer, question otherwise). First seconds of playback
   // contain the soundbite that drove the match.
   playUrl: string;
   // Best-matching sentence (with adjacent context) from the matched-side
@@ -61,7 +61,7 @@ export interface SearchResult {
 export async function searchMoments(opts: SearchOptions): Promise<SearchResult> {
   const k = Math.min(Math.max(1, opts.k ?? DEFAULT_K), MAX_K);
   if (!opts.query || !opts.query.trim()) return { hits: [] };
-  // Match both sides of the Q&A pair by default — persona phrasing
+  // Match both sides of the Q&A pair by default. Persona phrasing
   // ("ecommerce founder", "med spa owner") lives in the question text, not
   // Alex's reply, so single-sided answer-only matching misses it.
   const speaker = opts.speaker ?? "both";
@@ -69,7 +69,7 @@ export async function searchMoments(opts: SearchOptions): Promise<SearchResult> 
   // Embed the raw query directly. We used to expand it via HyDE into a
   // hypothetical "podcast-style answer" before embedding, which boosted
   // answer-side matches but pushed persona / industry intent out of the
-  // vector — and persona text lives in the attendee question side, so
+  // vector, and persona text lives in the attendee question side, so
   // queries like "ecommerce founder" or "healthcare founder" couldn't
   // surface the right moments. Symmetric raw embedding lets either side win.
   const queryVec = await embedQuery(opts.query.trim());
@@ -230,7 +230,7 @@ function splitSentences(text: string): string[] {
  * context, and estimate its start time inside the video by interpolating
  * over the matched turn's [startS, endS] window using character offset.
  *
- * No extra embedding round-trip — lexical token overlap is cheap and good
+ * No extra embedding round-trip. Lexical token overlap is cheap and good
  * enough to choose between sentences inside a single turn. Falls back to
  * the first 1–2 sentences when nothing overlaps.
  */

@@ -1,0 +1,551 @@
+{
+  "ranAt": "2026-06-15T19:08:13.148Z",
+  "total": 9,
+  "passRate": 1,
+  "meanLatencyMs": 6535.888888888889,
+  "medianLatencyMs": 4626,
+  "meanTop1JudgeScore": 0.9666666666666666,
+  "meanHits": 3.2222222222222223,
+  "details": [
+    {
+      "query": "female founders building a service business",
+      "source": "cycling",
+      "extracted": {
+        "industry": "other",
+        "revenueBands": [],
+        "gender": "female",
+        "topics": [],
+        "residualText": "building a service business"
+      },
+      "hitsCount": 2,
+      "topHits": [
+        {
+          "videoTitle": "$3M Med Spa Owner Wants to Scale to $20M",
+          "videoId": "rqJM6mFhyes",
+          "startS": 0,
+          "durationS": 489,
+          "industry": "health_and_wellness",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "female",
+          "topics": [
+            "identifying_the_constraint",
+            "hiring_and_firing",
+            "founder_to_operator_transition"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.33710083,
+          "reason": "Directly addresses a female founder scaling her wellness service business."
+        },
+        {
+          "videoTitle": "Helping a $1.5M Nail Salon Owner Stop Doing Too Much",
+          "videoId": "I1NYJ8dm4Jk",
+          "startS": 0,
+          "durationS": 546,
+          "industry": "health_and_wellness",
+          "secondaryIndustries": [
+            "creator_and_media",
+            "education_and_coaching"
+          ],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "female",
+          "topics": [
+            "franchising",
+            "multiple_businesses_and_focus",
+            "founder_to_operator_transition"
+          ],
+          "judgeScore": 0.7,
+          "semanticScore": 0.4085278,
+          "reason": "Discusses a female founder's service business but focuses more on franchising and lead generation."
+        }
+      ],
+      "latencyMs": 8229,
+      "meanTop3JudgeScore": 0.85,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "home services hiring their first sales team",
+      "source": "cycling",
+      "extracted": {
+        "industry": "home_services",
+        "revenueBands": [],
+        "gender": null,
+        "topics": [
+          "sales_team_building"
+        ],
+        "residualText": "hiring their first sales team"
+      },
+      "hitsCount": 5,
+      "topHits": [
+        {
+          "videoTitle": "Watch This If You Have a Service Business",
+          "videoId": "jqo0lVveh98",
+          "startS": 2095.99,
+          "durationS": 593,
+          "industry": "home_services",
+          "secondaryIndustries": [],
+          "revenueBand": "$5-25M",
+          "attendeeGender": "female",
+          "topics": [
+            "sales_team_building",
+            "hiring_and_firing",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.49719575,
+          "reason": "Directly addresses building a sales recruiting machine for a home services company."
+        },
+        {
+          "videoTitle": "Helping 6 Business Owners Scale in 33 Minutes",
+          "videoId": "0EqJD2o-Mnk",
+          "startS": 1119.12,
+          "durationS": 331,
+          "industry": "home_services",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "male",
+          "topics": [
+            "sales_team_building",
+            "lead_generation",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.47417217,
+          "reason": "Focuses on splitting sales teams and hiring for a roofing company."
+        },
+        {
+          "videoTitle": "Helping 6 Business Owners Scale in 33 Minutes",
+          "videoId": "0EqJD2o-Mnk",
+          "startS": 791.265,
+          "durationS": 326,
+          "industry": "home_services",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "male",
+          "topics": [
+            "hiring_and_firing",
+            "founder_to_operator_transition",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 0.7,
+          "semanticScore": 0.43459952,
+          "reason": "Discusses hiring technicians but not specifically about a sales team."
+        }
+      ],
+      "latencyMs": 10392,
+      "meanTop3JudgeScore": 0.9,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "real estate brokers",
+      "source": "cycling",
+      "extracted": {
+        "industry": "real_estate",
+        "revenueBands": [],
+        "gender": null,
+        "topics": [],
+        "residualText": ""
+      },
+      "hitsCount": 9,
+      "topHits": [
+        {
+          "videoTitle": "He Sold $125M in Real Estate After I Fired Him",
+          "videoId": "HlK_MeYWKEs",
+          "startS": 0,
+          "durationS": 839,
+          "industry": "real_estate",
+          "secondaryIndustries": [],
+          "revenueBand": "$25M+",
+          "attendeeGender": "male",
+          "topics": [
+            "multiple_businesses_and_focus",
+            "pivoting_and_new_offerings",
+            "offer_and_productization"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.42454362,
+          "reason": "Directly discusses strategies for real estate brokers focusing on sales and management."
+        },
+        {
+          "videoTitle": "I Feel Stupid\": Apartment Broker Stuck at $250K",
+          "videoId": "pEKRblMK-Xg",
+          "startS": 0,
+          "durationS": 384,
+          "industry": "real_estate",
+          "secondaryIndustries": [],
+          "revenueBand": "<$1M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "identifying_the_constraint",
+            "hiring_and_firing",
+            "founder_to_operator_transition"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.38924062,
+          "reason": "Focuses on an apartment broker's growth strategies and hiring needs."
+        },
+        {
+          "videoTitle": "He’s at $1.2M Solo and Walking Away From It",
+          "videoId": "gMXG_HoYnRY",
+          "startS": 0,
+          "durationS": 388,
+          "industry": "real_estate",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "male",
+          "topics": [
+            "lead_generation",
+            "marketing_attribution",
+            "offer_and_productization"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.37895727,
+          "reason": "Addresses customer acquisition strategies for a commercial real estate advisor."
+        }
+      ],
+      "latencyMs": 12293,
+      "meanTop3JudgeScore": 1,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "agency owners around $1-5M with churn problems",
+      "source": "cycling",
+      "extracted": {
+        "industry": "agency",
+        "revenueBands": [
+          "$1-5M"
+        ],
+        "gender": null,
+        "topics": [
+          "customer_retention_and_churn"
+        ],
+        "residualText": ""
+      },
+      "hitsCount": 2,
+      "topHits": [
+        {
+          "videoTitle": "How to Scale a White Label Agency Past $1.5M",
+          "videoId": "0coMtm_i1UA",
+          "startS": 0,
+          "durationS": 361,
+          "industry": "agency",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "customer_retention_and_churn",
+            "pricing_strategy",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.5972421,
+          "reason": "Directly addresses churn issues and pricing strategies for agency owners."
+        },
+        {
+          "videoTitle": "Fixing a Sales Agency With a 40% Cancellation Rate",
+          "videoId": "2PfbKVGNgPM",
+          "startS": 0,
+          "durationS": 171,
+          "industry": "agency",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "sales_process_and_closing",
+            "customer_retention_and_churn",
+            "sops_systems_and_fulfillment"
+          ],
+          "judgeScore": 0.7,
+          "semanticScore": 0.43290722,
+          "reason": "Relevant to customer retention but in a different industry context."
+        }
+      ],
+      "latencyMs": 3362,
+      "meanTop3JudgeScore": 0.85,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "Young male restaurant owners",
+      "source": "hero",
+      "extracted": {
+        "industry": "food_and_beverage",
+        "revenueBands": [],
+        "gender": "male",
+        "topics": [],
+        "residualText": "Young owners"
+      },
+      "hitsCount": 1,
+      "topHits": [
+        {
+          "videoTitle": "How a 22 Year Old Built a $2.4M Pizza Shop",
+          "videoId": "pobfyHIItag",
+          "startS": 0,
+          "durationS": 448,
+          "industry": "food_and_beverage",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "male",
+          "topics": [
+            "multi_location_expansion",
+            "founder_to_operator_transition",
+            "hiring_and_firing"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.38648272,
+          "reason": "Directly discusses a young male restaurant owner considering expansion."
+        }
+      ],
+      "latencyMs": 2721,
+      "meanTop3JudgeScore": 1,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "Med spa owners doing under $5M",
+      "source": "hero",
+      "extracted": {
+        "industry": "health_and_wellness",
+        "revenueBands": [
+          "<$1M",
+          "$1-5M"
+        ],
+        "gender": null,
+        "topics": [],
+        "residualText": "doing"
+      },
+      "hitsCount": 2,
+      "topHits": [
+        {
+          "videoTitle": "Why I'm Rolling Up 50 Med Spas Instead of Exiting",
+          "videoId": "Ok8cv-ivKIw",
+          "startS": 0,
+          "durationS": 240,
+          "industry": "health_and_wellness",
+          "secondaryIndustries": [
+            "education_and_coaching"
+          ],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "founder_to_operator_transition",
+            "acquisitions_and_rollups",
+            "multiple_businesses_and_focus"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.15678069,
+          "reason": "Directly discusses a med spa owner and relevant growth strategies."
+        },
+        {
+          "videoTitle": "$3M Med Spa Owner Wants to Scale to $20M",
+          "videoId": "rqJM6mFhyes",
+          "startS": 0,
+          "durationS": 489,
+          "industry": "health_and_wellness",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "female",
+          "topics": [
+            "identifying_the_constraint",
+            "hiring_and_firing",
+            "founder_to_operator_transition"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.13006465,
+          "reason": "Focuses on a wellness/weight loss med spa and scaling strategies."
+        }
+      ],
+      "latencyMs": 4626,
+      "meanTop3JudgeScore": 1,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "Ecommerce founders doing over $10M",
+      "source": "hero",
+      "extracted": {
+        "industry": "e_commerce",
+        "revenueBands": [
+          "$5-25M",
+          "$25M+"
+        ],
+        "gender": null,
+        "topics": [],
+        "residualText": "founders doing"
+      },
+      "hitsCount": 1,
+      "topHits": [
+        {
+          "videoTitle": "Scaling a $22M Hemp Distributor to $50M",
+          "videoId": "85lDC9uzFWI",
+          "startS": 0,
+          "durationS": 182,
+          "industry": "e_commerce",
+          "secondaryIndustries": [],
+          "revenueBand": "$5-25M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "pivoting_and_new_offerings",
+            "offer_and_productization",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 0.7,
+          "semanticScore": 0.19225799,
+          "reason": "Relevant to e-commerce growth but focuses on regulatory issues rather than founders over $10M."
+        }
+      ],
+      "latencyMs": 2934,
+      "meanTop3JudgeScore": 0.7,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "Business owners over $1M dealing with churn",
+      "source": "hero",
+      "extracted": {
+        "industry": "other",
+        "revenueBands": [
+          "$1-5M",
+          "$5-25M",
+          "$25M+"
+        ],
+        "gender": null,
+        "topics": [
+          "customer_retention_and_churn"
+        ],
+        "residualText": "Business owners dealing with churn"
+      },
+      "hitsCount": 4,
+      "topHits": [
+        {
+          "videoTitle": "He Can Double His Business Tomorrow and Won't",
+          "videoId": "TaeBazpcRk8",
+          "startS": 1.76,
+          "durationS": 423,
+          "industry": "health_and_wellness",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "customer_retention_and_churn",
+            "identifying_the_constraint",
+            "multi_location_expansion"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.5646293,
+          "reason": "Directly addresses churn as a constraint for scaling."
+        },
+        {
+          "videoTitle": "How to Scale a White Label Agency Past $1.5M",
+          "videoId": "0coMtm_i1UA",
+          "startS": 0,
+          "durationS": 361,
+          "industry": "agency",
+          "secondaryIndustries": [],
+          "revenueBand": "$1-5M",
+          "attendeeGender": "unknown",
+          "topics": [
+            "customer_retention_and_churn",
+            "pricing_strategy",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.4887557,
+          "reason": "Focuses on high churn and pricing strategy for business growth."
+        },
+        {
+          "videoTitle": "Helping 4 Educational Business Owners Build a $1M Business in 25 Minutes",
+          "videoId": "BYpTRiRqS1Y",
+          "startS": 1100,
+          "durationS": 416,
+          "industry": "agency",
+          "secondaryIndustries": [],
+          "revenueBand": "$5-25M",
+          "attendeeGender": "male",
+          "topics": [
+            "customer_retention_and_churn",
+            "pivoting_and_new_offerings",
+            "offer_and_productization"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.46365356,
+          "reason": "Discusses reducing churn as a key to scaling revenue."
+        }
+      ],
+      "latencyMs": 10470,
+      "meanTop3JudgeScore": 1,
+      "passedRelevanceFloor": true
+    },
+    {
+      "query": "Business owners over $50M",
+      "source": "hero",
+      "extracted": {
+        "industry": null,
+        "revenueBands": [
+          "$25M+"
+        ],
+        "gender": null,
+        "topics": [],
+        "residualText": "Business owners"
+      },
+      "hitsCount": 3,
+      "topHits": [
+        {
+          "videoTitle": "He Sold $125M in Real Estate After I Fired Him",
+          "videoId": "HlK_MeYWKEs",
+          "startS": 0,
+          "durationS": 839,
+          "industry": "real_estate",
+          "secondaryIndustries": [],
+          "revenueBand": "$25M+",
+          "attendeeGender": "male",
+          "topics": [
+            "multiple_businesses_and_focus",
+            "pivoting_and_new_offerings",
+            "offer_and_productization"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.3223458,
+          "reason": "The candidate is a real estate agent with sales projected over $50M."
+        },
+        {
+          "videoTitle": "Scaling a $50M Pest Control Company to $1B",
+          "videoId": "bYGRh4ZOdUo",
+          "startS": 2,
+          "durationS": 565,
+          "industry": "home_services",
+          "secondaryIndustries": [],
+          "revenueBand": "$25M+",
+          "attendeeGender": "male",
+          "topics": [
+            "hiring_and_firing",
+            "culture_and_team_management",
+            "identifying_the_constraint"
+          ],
+          "judgeScore": 1,
+          "semanticScore": 0.30941403,
+          "reason": "The candidate operates a pest control business generating $50M annually."
+        },
+        {
+          "videoTitle": "How to Raise Capital Without Using Your Personal Network",
+          "videoId": "EjBgv-DGJ-M",
+          "startS": 0,
+          "durationS": 138,
+          "industry": "real_estate",
+          "secondaryIndustries": [
+            "financial_services"
+          ],
+          "revenueBand": "$25M+",
+          "attendeeGender": "male",
+          "topics": [
+            "raising_capital",
+            "lead_generation",
+            "sales_process_and_closing"
+          ],
+          "judgeScore": 0.7,
+          "semanticScore": 0.30494395,
+          "reason": "The candidate is close to $50M but focuses on attracting investors."
+        }
+      ],
+      "latencyMs": 3796,
+      "meanTop3JudgeScore": 0.9,
+      "passedRelevanceFloor": true
+    }
+  ]
+}

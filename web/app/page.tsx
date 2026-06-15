@@ -1,6 +1,9 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import ExamplePill from "@/components/ExamplePill";
+import CostSection from "@/components/CostSection";
+import CyclingExample from "@/components/CyclingExample";
+import FailureRecoverySection from "@/components/FailureRecoverySection";
+import GoldenSetSection from "@/components/GoldenSetSection";
 import HeroAnimation from "@/components/HeroAnimation";
 import MobileHeroAnimation from "@/components/MobileHeroAnimation";
 import SearchProgressBar from "@/components/SearchProgressBar";
@@ -20,14 +23,6 @@ import {
 } from "@/lib/taxonomy";
 
 export const dynamic = "force-dynamic";
-
-const EXAMPLES = [
-  "med spa owners stuck under $5M trying to scale",
-  "female founders building a service business",
-  "home services hiring their first sales team",
-  "real estate brokers raising prices",
-  "agency owners around $1-5M with churn problems",
-];
 
 function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
@@ -176,7 +171,7 @@ export default async function Home({
               Speed up your editing pipeline 100x
             </h1>
             <p className="mt-4 sm:mt-5 text-lg sm:text-xl lg:text-2xl text-zinc-600 dark:text-zinc-400 leading-snug">
-              Search your entire long-form content library in seconds.
+              Search your long-form content library in seconds.
             </p>
 
             {/* Mobile-only animated demo (between subtitle and search input) */}
@@ -201,6 +196,8 @@ export default async function Home({
               Search
             </button>
           </div>
+
+          <CyclingExample />
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <label className="flex flex-col gap-1">
@@ -271,19 +268,6 @@ export default async function Home({
           </p>
         )}
 
-        {!hasAnyInput && !error && (
-          <div className="mt-10">
-            <p className="text-sm text-zinc-500 mb-3">Try one of these:</p>
-            <ul className="flex flex-wrap gap-2">
-              {EXAMPLES.map((eq) => (
-                <li key={eq}>
-                  <ExamplePill query={eq} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
         {extracted && (extracted.industry || extracted.revenueBands.length > 0 || extracted.gender || extracted.topics.length > 0) && (
           <div className="mt-6 rounded-md border border-zinc-200 dark:border-zinc-800 px-4 py-3 text-xs text-zinc-600 dark:text-zinc-400">
             <span className="text-zinc-500">Interpreted from your text:</span>{" "}
@@ -316,7 +300,7 @@ export default async function Home({
           </p>
         )}
 
-        <ul className="mt-6 space-y-4">
+        <ul className="mt-6 space-y-4 max-h-screen overflow-y-auto pr-1">
           {hits.map((hit) => {
             const duration = Math.max(0, Math.round(hit.endS - hit.startS));
             const thumbUrl = `https://i.ytimg.com/vi/${hit.videoId}/mqdefault.jpg`;
@@ -326,7 +310,7 @@ export default async function Home({
                 className="group rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:border-zinc-400 dark:hover:border-zinc-600 transition"
               >
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
-                  {/* Thumbnail — full-width on mobile, fixed 200px on tablet+. Clickable, with play overlay + duration badge */}
+                  {/* Thumbnail: full-width on mobile, fixed 200px on tablet+. Clickable, with play overlay + duration badge */}
                   <a
                     href={hit.playUrl}
                     target="_blank"
@@ -375,7 +359,7 @@ export default async function Home({
                         <span
                           key={si}
                           className="rounded border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5"
-                          title="Secondary industry — verified via separate audit pass"
+                          title="Secondary industry, verified via separate audit pass"
                         >
                           + {INDUSTRY_LABELS[si] ?? si}
                         </span>
@@ -411,6 +395,10 @@ export default async function Home({
             );
           })}
         </ul>
+
+        <GoldenSetSection />
+        <FailureRecoverySection />
+        <CostSection />
       </div>
     </main>
   );

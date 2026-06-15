@@ -1,6 +1,6 @@
 # Search and Retrieval Tool Long-Form Content Library
 
-A production-grade AI-native search and retrieval system over a 500+ minute long-form Q&A workshop library. A non-technical editor types something like *"med spa owners under $5M trying to scale"* and the system returns ranked, timestamped attendee sessions ready to drop into an edit.
+A production-grade AI-native search and retrieval system over a 500+ minute long-form Q&A workshop library. A non-technical editor types something like *"med spa owners doing under $5M"* and the system returns ranked, timestamped attendee sessions ready to drop into an edit.
 
 The same retrieval surface is exposed three ways: a web portal for editors, a JSON API for internal tooling, and an MCP server for AI agents.
 
@@ -9,21 +9,22 @@ The same retrieval surface is exposed three ways: a web portal for editors, a JS
 
 | | Manual editor scrubbing | This system |
 |---|---|---|
-| Time per clip | 30 to 60 minutes | 2 to 3 seconds |
-| Cost per clip | $25 to $80 (1 hr × $50 to $80 senior-editor rate) | $0.0018 (less than two-tenths of a cent) |
+| Time per clip | 30 to 60 minutes | ~4.6s median (measured) |
+| Cost per clip | $25 to $80 (30 to 60 min × $50 to $80 senior-editor rate) | $0.0018 (less than two-tenths of a cent) |
 | Scales linearly with corpus | Yes (3x footage = 3x time) | No (10x footage = same latency) |
 | Repeatable for a different ICP | Start the search from scratch | Same query in seconds |
 
-Concrete per-month numbers for a studio finding 100 clips:
+Concrete per-month numbers for a studio finding 100 clips (100 × 30 min scrub time × $60/hr — the home page calculator lets you sweep these assumptions):
 
 | | Editor scrubbing only | With this system |
 |---|---|---|
-| Search labor | 75 hours | 5 minutes |
-| Labor cost at $60/hr | $4,500 | $5 |
-| OpenAI inference cost | $0 | $0.18 |
-| **Total** | **$4,500** | **~$5** |
+| Search labor | 50 hours (100 × 30 min) | ~8 minutes (100 × 4.6s) |
+| Labor cost at $60/hr | $3,000 | $0 |
+| OpenAI inference | $0 | $0.18 |
+| Fixed managed infra | $0 | $25 |
+| **Total** | **$3,000** | **~$25** |
 
-That is roughly a **900x latency reduction** per clip and a **25,000x cost reduction** per query, before counting opportunity cost of the editor's time on the work that actually requires a human.
+That is roughly a **~400x latency reduction** per clip and a **~120x all-in cost reduction** at 100 clips/month, before counting opportunity cost of the editor's time on the work that actually requires a human.
 
 ### Per-query cost breakdown
 
@@ -38,12 +39,19 @@ At OpenAI list pricing:
 
 Vector search (Qdrant) and Postgres reads add no marginal cost. Per-query cost is logged to `query_log` in Postgres; a rolling 24-hour sum drives the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
 
-| Item | One-time cost (per session) |
-|---|---|
-| Ingest tagger + audit (Claude Sonnet 4.6) | ~$0.005 |
-| Session embedding | ~$0.000005 |
+### Indexing cost per TB of source footage
 
-Full re-ingest of the current ~71-session corpus is about $0.40 in inference plus Deepgram transcription minutes.
+For a fresh ingest of 1 TB of source footage (~250 hours of 1080p workshop video at typical export bitrate, ~8 attendee sessions per hour, ~2,000 sessions total):
+
+| Stage | Service | Math | Cost |
+|---|---|---|---|
+| Transcription | Deepgram nova-3 batch | 15,000 min × $0.0043/min | $64.50 |
+| Tagging + audit | Claude Sonnet 4.6, two passes | 2,000 sessions × $0.005 | $10.00 |
+| Session embeddings | text-embedding-3-small | 2,000 sessions × $0.000005 | $0.01 |
+| Storage (Blob + Postgres + Qdrant) | Frames + rows + ~12 MB of 1536-d vectors | Free tier | ~$0 |
+| **Total per TB, one-time** |  |  | **~$75** |
+
+The current ~71-session corpus (~10 hours) re-ingests for about $0.40 in inference plus Deepgram transcription minutes.
 
 ## What it does
 
@@ -130,11 +138,14 @@ NL query
 [2] embed (text-embedding-3-small over residualText OR raw query)
    |
    v
-[3] Qdrant search with hard payload filter on revenue/gender. Industry and
-   | topics are SOFT — the extractor's guesses no longer gate the candidate
-   | pool, only an editor's explicit UI dropdown pick does. This keeps
-   | general queries ("service-based businesses") from being silently
-   | hard-filtered down to one of 20 industry slugs.
+[3] Qdrant search with hard payload filter on revenue, gender, and
+   | *explicitly-named* industry. The extractor returns industry_certain=true
+   | only when the editor literally typed a specific industry term ("real
+   | estate brokers", "med spa owners", "HVAC contractors"); those become
+   | hard filters. When industry was inferred from a general descriptor
+   | ("service-based businesses", "business owners"), it stays a soft signal
+   | so the query isn't silently narrowed to one of 20 slugs. Topics remain
+   | soft unless the editor picked them in the UI.
    | topK = 30 candidates
    v
 [4] LLM judge pass (gpt-4o-mini) scores each candidate 0..1
@@ -146,13 +157,23 @@ NL query
 [6] Render: timestamped session cards with YouTube deep-link (?t=start_s-1)
 ```
 
-## Evaluation and monitoring
+## Evaluation
 
-- **Golden set** lives at `eval/golden_queries.yaml`. Each query lists expected `(video_id, t_min, t_max)` tuples that any reasonable retrieval should surface.
-- `scripts/eval.ts` runs the golden set plus 30 random paraphrased queries and reports recall@5, recall@10, and MRR. The latest report is written to `web/public/eval-latest.json` and rendered at `/eval` (dev-only, gated by `ENABLE_DEV_ROUTES`).
+Two evaluations back the claim that this works for the actual product goal — given an editor's natural-language description, surface the right sessions. Both render on the home page's Golden Set section.
+
+- **Demo eval** — `web/scripts/demo_eval.ts` runs the 9 demo queries (5 hero-animation queries + 4 cycling search-bar examples) through the live `searchSessions` pipeline. Writes `web/public/demo-eval-latest.json` with per-query top-3 hits, extracted filters, judge scores, and latency. Most recent run: 100% pass rate (every query returned ≥1 hit above the relevance floor), 97% mean top-1 judge confidence, ~4.6s median latency.
+- **Filter eval** — `web/scripts/filter_eval.ts` runs the 25 hand-labeled queries in `eval/extraction_test_set.yaml` through `extractFilters` and grades per-field accuracy against human-written expectations. Then computes hard-filter fidelity (do revenue/gender match in returned sessions?) using the demo-eval results. Writes `web/public/filter-eval-latest.json`. Most recent run: 92% all-fields-correct extraction, 100% hard-filter fidelity.
+- **Legacy moment recall** — `web/scripts/eval.ts` and `web/public/eval-latest.json` remain for moment-level recall@k testing, rendered at `/eval` (dev-only, gated by `ENABLE_DEV_ROUTES`).
+
+## Reliability
+
+- **Per-dependency health probes** (`web/lib/health.ts`) check Postgres (`select 1`), Qdrant (`getCollections`), OpenAI (`/v1/models`), and Redis (`/ping`) in parallel with a 4-second timeout each.
+- **`/api/status`** returns the live `deps` snapshot alongside corpus stats. Returns 503 if any required dep is down (Postgres, Qdrant, or OpenAI).
+- **Hourly cron probe** at `/api/health/check` (scheduled in `web/vercel.json`) runs the probes, persists each tick to the `health_checks` Postgres table (jsonb snapshot for forensic replay), and POSTs to `ALERT_WEBHOOK_URL` if any required dep is down. Gated by `CRON_SECRET` in production.
 - **Per-query cost telemetry** is logged to `query_log` in Postgres. A rolling 24h sum feeds the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
-- **Rate limiting**: Upstash sliding-window 30 req/min per IP and fixed 10k/day global, enforced in `proxy.ts`.
+- **Rate limiting**: Upstash sliding-window 30 req/min per IP and fixed 10k/day global, enforced in `web/proxy.ts`. Fails closed when Redis is unreachable.
 - **IP-count free tier**: anonymous IPs get 5 free searches per 24h (`lib/searchGate.ts`) before being redirected to `/login`. The password unlocks unlimited searches via a 30-day cookie.
+- **On-call runbook**: per-dependency failure modes and first-three-things-to-check at `docs/failure-recovery.md`.
 
 ## Stack
 
@@ -214,29 +235,45 @@ acq_search_retrieval/
 │   │       ├── mcp/         # MCP server (search_sessions, search_moments)
 │   │       ├── search*/     # JSON search endpoints (dev-only)
 │   │       ├── login/       # Auth cookie issuer
-│   │       └── status/      # Health check
+│   │       ├── status/      # Corpus stats + per-dep health snapshot
+│   │       └── health/check # Hourly cron probe target
 │   ├── components/
 │   │   ├── HeroAnimation.tsx        # Desktop animated demo
 │   │   ├── MobileHeroAnimation.tsx  # Mobile cross-fade demo
-│   │   └── SearchProgressBar.tsx    # Stage-by-stage progress overlay
+│   │   ├── SearchProgressBar.tsx    # Stage-by-stage progress overlay
+│   │   ├── CyclingExample.tsx       # Cycling "Try one of these" pill
+│   │   ├── CostSection.tsx          # Per-TB / per-query cost panels
+│   │   ├── SavingsCalculator.tsx    # Interactive labor-savings widget
+│   │   ├── GoldenSetSection.tsx     # Demo-eval + filter-eval readout
+│   │   └── FailureRecoverySection.tsx
 │   ├── lib/
 │   │   ├── sessions.ts      # Main search pipeline
 │   │   ├── search.ts        # Per-moment search (used by MCP)
-│   │   ├── extract.ts       # NL filter extraction
+│   │   ├── extract.ts       # NL filter extraction (incl. industry_certain)
 │   │   ├── searchGate.ts    # IP-count free tier
 │   │   ├── env.ts           # Typed env access + devRoutesEnabled()
-│   │   └── taxonomy.ts      # Industry / revenue / topic / gender enums
+│   │   ├── taxonomy.ts      # Industry / revenue / topic / gender enums
+│   │   └── health.ts        # Per-dep probes used by /api/status + cron
 │   ├── proxy.ts             # Next.js 16 middleware (rate limit)
+│   ├── vercel.json          # Hourly cron config for /api/health/check
+│   ├── public/
+│   │   ├── demo-eval-latest.json     # Generated by demo_eval.ts
+│   │   ├── filter-eval-latest.json   # Generated by filter_eval.ts
+│   │   └── eval-latest.json          # Generated by eval.ts (moment recall)
 │   └── scripts/
-│       ├── eval.ts          # Golden-set + paraphrase eval harness
+│       ├── eval.ts          # Legacy moment-level recall harness
+│       ├── demo_eval.ts     # Runs the 9 demo queries through searchSessions
+│       ├── filter_eval.ts   # Grades extractor accuracy + filter fidelity
 │       ├── hero_queries.ts  # Helper that runs the demo queries
 │       └── record_demo.ts   # Generates docs/demo.gif from the live site
 │
 ├── eval/
-│   └── golden_queries.yaml  # Hand-labeled retrieval ground truth
+│   ├── golden_queries.yaml         # Hand-labeled retrieval ground truth
+│   └── extraction_test_set.yaml    # 25 hand-labeled extraction test queries
 │
 ├── docs/
-│   └── demo.gif             # Hero animation (regenerate via record_demo.ts)
+│   ├── demo.gif                # Hero animation (regenerate via record_demo.ts)
+│   └── failure-recovery.md     # On-call runbook
 │
 └── .env.example
 ```

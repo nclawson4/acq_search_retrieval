@@ -1,6 +1,6 @@
 -- Multi-modal video search schema.
 -- Apply with: psql "$DATABASE_URL" -f ingest/schema.sql
--- Idempotent — safe to re-run.
+-- Idempotent. Safe to re-run.
 
 create table if not exists videos (
     id                text primary key,           -- youtube video id
@@ -150,3 +150,19 @@ create table if not exists query_log (
     embed_tokens        integer
 );
 create index if not exists query_log_time_idx on query_log(queried_at);
+
+-- Per-dependency health snapshots from the cron probe at /api/health/check.
+-- One row per cron tick (hourly). `snapshot` carries per-dep latency + error
+-- for forensic replay. The route also CREATE TABLE IF NOT EXISTS this at
+-- runtime so a fresh deploy never blocks on a manual migration.
+create table if not exists health_checks (
+    id           bigserial primary key,
+    checked_at   timestamptz default now(),
+    ok           boolean not null,
+    postgres_ok  boolean not null,
+    qdrant_ok    boolean not null,
+    openai_ok    boolean not null,
+    redis_ok     boolean not null,
+    snapshot     jsonb   not null
+);
+create index if not exists health_checks_time_idx on health_checks(checked_at desc);

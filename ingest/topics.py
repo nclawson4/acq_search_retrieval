@@ -2,7 +2,7 @@
 
 Editors assembling compilation clips need precise filters. The labels here
 are the universe the LLM tagger and the search-side filter extractor are
-both constrained to. Changing a label is a breaking change — re-tag all
+both constrained to. Changing a label is a breaking change. Re-tag all
 sessions.
 """
 from __future__ import annotations
@@ -47,7 +47,7 @@ TOPICS: list[str] = [
 TOPIC_LABELS: dict[str, str] = {
     "lead_generation": "Lead generation (paid, inbound, outbound)",
     "sales_process_and_closing": "Sales process & closing",
-    "sales_team_building": "Sales team — hiring, training, comp",
+    "sales_team_building": "Sales team: hiring, training, comp",
     "customer_retention_and_churn": "Customer retention & churn",
     "marketing_attribution": "Marketing attribution & measurement",
     "pricing_strategy": "Pricing strategy",

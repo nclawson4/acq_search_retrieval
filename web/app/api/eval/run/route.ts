@@ -59,7 +59,7 @@ export async function POST() {
   }>;
 
   if (queries.length === 0) {
-    return NextResponse.json({ error: "No gold queries yet — build the set first." }, { status: 400 });
+    return NextResponse.json({ error: "No gold queries yet. Build the set first." }, { status: 400 });
   }
 
   let totalCost = 0;

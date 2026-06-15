@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Provide query or at least one filter" }, { status: 400 });
   }
 
-  // Daily cost ceiling — defends a public demo from cost-exhaustion abuse.
+  // Daily cost ceiling. Defends a public demo from cost-exhaustion abuse.
   const spent = await dailySpendUSD();
   if (spent >= DAILY_COST_CEILING_USD) {
     return NextResponse.json(

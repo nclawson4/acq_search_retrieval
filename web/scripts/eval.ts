@@ -154,7 +154,7 @@ async function evalQuery(
 
 async function buildSyntheticQueries(n: number): Promise<GoldenQuery[]> {
   // Sample answer text from moments (the indexed unit). Skip very short
-  // answers — they don't contain enough signal to paraphrase usefully.
+  // answers, since they don't contain enough signal to paraphrase usefully.
   const rows = (await sql()`
     select id, video_id, a_start_s as start_s, a_end_s as end_s, a_text as text
     from moments
@@ -176,7 +176,7 @@ async function buildSyntheticQueries(n: number): Promise<GoldenQuery[]> {
           t_max: Number(r.end_s) + 15,
         },
       ],
-      notes: "synthetic — paraphrased from source answer",
+      notes: "synthetic: paraphrased from source answer",
     });
   }
   return out;
@@ -208,7 +208,7 @@ async function main() {
   }
 
   if (queries.length === 0) {
-    console.log("No queries — add entries to eval/golden_queries.yaml or pass --n N.");
+    console.log("No queries. Add entries to eval/golden_queries.yaml or pass --n N.");
     process.exit(0);
   }
 

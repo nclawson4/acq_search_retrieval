@@ -1,4 +1,4 @@
-# Secrets — never commit
+# Secrets, never commit
 .env
 .env.*
 !.env.example
@@ -27,7 +27,7 @@ build/
 # Vercel
 .vercel/
 
-# Ingest artifacts — raw media must not be committed
+# Ingest artifacts: raw media must not be committed
 media/
 *.mp4
 *.m4a
@@ -60,7 +60,7 @@ ingest/cache/
 ingest/transcripts/
 ingest/scenes/
 
-# Eval — allow committed results, ignore scratch
+# Eval: allow committed results, ignore scratch
 eval/results/scratch/
 
 # OS / editor

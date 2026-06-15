@@ -13,7 +13,7 @@ const STAGES = [
 // Per-stage hold durations. Earlier stages dwell longer so the bar paces
 // roughly with the real pipeline (~3.3s total), instead of racing through
 // the first four and then stalling on "Finalizing" while the judge runs.
-// Stage 4 has no entry — it holds until the page navigation arrives.
+// Stage 4 has no entry. It holds until the page navigation arrives.
 const STAGE_MS = [900, 800, 750, 1000];
 
 export default function SearchProgressBar() {

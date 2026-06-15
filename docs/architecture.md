@@ -51,7 +51,7 @@
 
 - **Transcript: `text-embedding-3-small` (1536-d)**. Strong text retrieval at very low cost. Single provider for query embedding keeps runtime simple.
 - **Frames: open CLIP `ViT-L-14` (LAION-2B, 768-d)**. Free and self-hosted, identical text-encoder used at query time enables cross-modal retrieval. `ViT-H-14` is marginally better but ~3× compute; not worth it.
-- **Cross-modal retrieval**: the two indexes are searched independently with the same text query (one OpenAI embed, one CLIP-text embed). Scores normalize per-collection, merged with a weighted sum (transcript 0.7, frame 0.3 default — tunable), then de-duplicated within a 10 s window.
+- **Cross-modal retrieval**: the two indexes are searched independently with the same text query (one OpenAI embed, one CLIP-text embed). Scores normalize per-collection, merged with a weighted sum (transcript 0.7, frame 0.3 default, tunable), then de-duplicated within a 10 s window.
 
 ## Segmentation
 
