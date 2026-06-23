@@ -5,7 +5,7 @@
 - Editor-grade moment sourcing over a long-form video library
 - One natural-language query → ranked, timestamped moments
 - Identical retrieval core surfaced via web portal and remote MCP server
-- Public, shareable, rate-limited; no login
+- Rate-limited, with a login gate: anonymous IPs get a small free-search allowance per 24h, then a password unlocks unlimited searches; the JSON search routes are dev-gated
 
 ## Data flow
 
@@ -14,10 +14,9 @@
                        │  Ingest (Python CLI, local) │
                        │                             │
    urls.txt ──────────▶│  yt-dlp ──▶ mp4 + m4a       │
-                       │  Whisper API ──▶ transcript │
+                       │  Deepgram nova-3 ──▶ transcript │
                        │  scenedetect ──▶ keyframes  │
-                       │  text-embed ──▶ seg vectors │
-                       │  open CLIP ──▶ frame vectors│
+                       │  text-embed ──▶ session vec │
                        └────┬────────────┬───────────┘
                             │            │
                      vectors│            │metadata + thumbnails
@@ -38,9 +37,10 @@
                       │ Next.js (web/) on Vercel     │
                       │                              │
                       │  /             search UI     │
-                      │  /api/search   route handler │
+                      │  /login        password gate │
                       │  /api/mcp      Streamable MCP│
-                      │  /eval         dashboard     │
+                      │  /api/search   route (dev)   │
+                      │  /eval         dashboard (dev)│
                       └──────────────┬───────────────┘
                                      │
                                      ▼
@@ -49,20 +49,19 @@
 
 ## Embedding choices and why
 
-- **Transcript: `text-embedding-3-small` (1536-d)**. Strong text retrieval at very low cost. Single provider for query embedding keeps runtime simple.
-- **Frames: open CLIP `ViT-L-14` (LAION-2B, 768-d)**. Free and self-hosted, identical text-encoder used at query time enables cross-modal retrieval. `ViT-H-14` is marginally better but ~3× compute; not worth it.
-- **Cross-modal retrieval**: the two indexes are searched independently with the same text query (one OpenAI embed, one CLIP-text embed). Scores normalize per-collection, merged with a weighted sum (transcript 0.7, frame 0.3 default, tunable), then de-duplicated within a 10 s window.
+- **Session text: `text-embedding-3-small` (1536-d)**. Strong text retrieval at very low cost. Single provider for query embedding keeps runtime simple.
+- **Text-only retrieval**: the index is a single dense collection over session text (residual query text + summary). Keyframes are extracted per scene for thumbnails but are not embedded — there is no CLIP frame-vector index and no cross-modal merge.
 
 ## Segmentation
 
-- Whisper API returns word-level timestamps via `timestamp_granularities=['word']` (verbose_json).
+- Deepgram nova-3 returns word-level timestamps (and speaker clusters) for each transcript.
 - Segments: ~30 s windows with 5 s overlap, snapped to nearest sentence boundary (`.`, `?`, `!`) within ±5 s.
 - Each segment stores: video_id, start_s, end_s, text, vector.
 
 ## Keyframes
 
 - PySceneDetect `ContentDetector` (threshold 27 default). One representative frame per scene at the middle timestamp.
-- Frames written as 384×216 (or native aspect, capped to 600px wide) JPEG to keep blob storage and CLIP inference cheap.
+- Frames written as 384×216 (or native aspect, capped to 600px wide) JPEG to keep blob storage cheap. Frames are thumbnails only; they are not embedded.
 - Each frame stores: video_id, t_s, blob_url, vector.
 
 ## Postgres schema
@@ -118,8 +117,8 @@ Payload is intentionally minimal; the heavy fields (text, blob_url) live in Post
 
 ## MCP tool surface
 
-- `search_moments(query: string, k?: number = 10, video_id?: string)` → ranked moments.
-- `get_video(video_id: string)` → video metadata + segment count.
+- `search_moments(query: string, k?: number = 10, video_id?: string, speaker?: "answer" | "question" | "both", industry?: string, revenue_band?: string, problems?: string[], min_audio_quality?: number)` → ranked Q&A moments.
+- `get_video(video_id: string)` → video metadata + `moment_count` + `frame_count`.
 
 Deliberately small. Adding tools only after eval shows necessity.
 
@@ -127,7 +126,7 @@ Deliberately small. Adding tools only after eval shows necessity.
 
 - Per-IP, sliding window: 30 req/min.
 - Global daily ceiling: 10,000 req/day. Once hit, search returns a static "demo limit reached" message until UTC midnight.
-- Implemented in middleware for both `/api/search` and `/api/mcp`.
+- Implemented at the proxy/middleware layer (`web/proxy.ts`), covering the homepage search path and `/api/mcp`; the JSON `/api/search*` routes are dev-gated.
 
 ## Eval
 

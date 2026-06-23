@@ -8,6 +8,7 @@ import HeroAnimation from "@/components/HeroAnimation";
 import MobileHeroAnimation from "@/components/MobileHeroAnimation";
 import SearchProgressBar from "@/components/SearchProgressBar";
 import { incrementAnonymousSearch } from "@/lib/searchGate";
+import { isOverDailyCeiling, logQueryCost } from "@/lib/cost";
 import { searchSessions, type SessionHit } from "@/lib/sessions";
 import {
   INDUSTRIES,
@@ -109,6 +110,20 @@ export default async function Home({
     if (!hasAnyInput) {
       return { hits: [], extracted: null, error: null, latencyMs: 0, costUSD: 0 };
     }
+    // Daily cost ceiling (default $5). Refuse the expensive search if the
+    // rolling 24h LLM+embedding spend has hit the cap. dailySpendUSD() fails
+    // open on DB error, so a transient Postgres blip never blocks search; only
+    // a real over-spend does. Returned as a normal error result (not thrown).
+    if (await isOverDailyCeiling()) {
+      return {
+        hits: [],
+        extracted: null,
+        error:
+          "Daily cost limit reached for the live demo. Search will resume tomorrow.",
+        latencyMs: 0,
+        costUSD: 0,
+      };
+    }
     try {
       const r = await searchSessions({
         query,
@@ -120,12 +135,20 @@ export default async function Home({
         },
         k: 20,
       });
+      // Fire-and-forget per-query cost telemetry. Never throws; a logging
+      // failure must not break search.
+      const costUSD = logQueryCost({
+        query,
+        nResults: r.hits.length,
+        latencyMs: r.latencyMs,
+        usage: r.usage,
+      });
       return {
         hits: r.hits,
         extracted: r.extracted,
         error: null,
         latencyMs: r.latencyMs,
-        costUSD: 0,
+        costUSD,
       };
     } catch (err) {
       return {

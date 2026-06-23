@@ -37,7 +37,7 @@ At OpenAI list pricing:
 | LLM judge re-rank | `gpt-4o-mini` | ~250 in / 30 out × 30 candidates | $0.001665 |
 | **Total per query** |  | | **~$0.0018** |
 
-Vector search (Qdrant) and Postgres reads add no marginal cost. Per-query cost is logged to `query_log` in Postgres; a rolling 24-hour sum drives the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
+Vector search (Qdrant) and Postgres reads add no marginal cost. Per-query cost is logged to `query_log` in Postgres; a rolling 24-hour sum drives the `DAILY_COST_CEILING_USD` circuit breaker (default $5) on both the homepage search path and `/api/search/sessions`.
 
 ### Indexing cost per TB of source footage
 
@@ -111,15 +111,15 @@ The editor never sees the pipeline. They type a query, get back a list of clips,
 
 | Stage | Module | Output |
 |---|---|---|
-| Fetch | `stages/fetch.py` | Raw audio + video metadata via `yt-dlp` |
+| Fetch | `stages/download.py` | Raw audio + video metadata via `yt-dlp` |
 | Transcribe | `stages/transcribe.py` | Deepgram nova-3 word-level timestamps + speaker clusters |
-| Voice fingerprint | `stages/diarize.py` | Resemblyzer compares each cluster to a reference clip of the host. Voice-match band widened so split host clusters both score as host |
+| Voice fingerprint | `stages/diarize.py` | Resemblyzer compares each cluster to a reference clip of the host. A single `VOICE_MATCH_FLOOR` (0.60) separates host from attendee clusters |
 | Session boundaries | `stages/sessions.py` | Per-video session start/end derived from cluster transitions, with hand-verified `boundary_overrides.py` for the 4 long-form videos |
-| Frame extraction | `stages/frames.py` | One representative frame per session at `start_s + 200/23.976s` |
+| Frame extraction | `stages/scenes.py` | PySceneDetect splits each video into scenes; one keyframe is extracted at the midpoint of each scene |
 | Tag | `stages/tag_session_v2.py` | Claude Sonnet 4.6 emits industry, revenue, gender, topics, summary, plus a verbatim supporting quote |
 | Audit | `stages/tag_session_v2.py` | Separate Claude call judges whether the quote supports each tag. Failed tags fall back to `other` |
-| Embed | `vectors.py` | OpenAI `text-embedding-3-small` over the residual session text + summary |
-| Upsert | `vectors.py` | Qdrant points keyed by `session_id` with structured payload |
+| Embed | `stages/embed.py` | OpenAI `text-embedding-3-small` over the residual session text + summary |
+| Upsert | `stages/push.py` | Qdrant points keyed by `session_id` with structured payload (`vectors.py` provisions the collections) |
 | Dedupe | `scripts/dedupe_sessions.py` | Cross-video summary-embedding similarity clusters near-duplicate sessions into `dup_group_id` |
 
 The ingest pipeline writes ground-truth metadata to Neon Postgres and vector embeddings to Qdrant Cloud. Postgres is the source of truth for filters and metadata; Qdrant is the dense retrieval index.
@@ -146,9 +146,10 @@ NL query
    | ("service-based businesses", "business owners"), it stays a soft signal
    | so the query isn't silently narrowed to one of 20 slugs. Topics remain
    | soft unless the editor picked them in the UI.
-   | topK = 30 candidates
+   | fetches k×20 candidates from Qdrant (OVERFETCH)
    v
-[4] LLM judge pass (gpt-4o-mini) scores each candidate 0..1
+[4] LLM judge pass (gpt-4o-mini) scores the top ~30 candidates
+   | (JUDGE_INPUT_LIMIT) 0..1
    | for "is this what the editor asked for"
    v
 [5] Collapse: same-video same-cluster, then cross-video dup_group_id
@@ -170,14 +171,14 @@ Two evaluations back the claim that this works for the actual product goal — g
 - **Per-dependency health probes** (`web/lib/health.ts`) check Postgres (`select 1`), Qdrant (`getCollections`), OpenAI (`/v1/models`), and Redis (`/ping`) in parallel with a 4-second timeout each.
 - **`/api/status`** returns the live `deps` snapshot alongside corpus stats. Returns 503 if any required dep is down (Postgres, Qdrant, or OpenAI).
 - **Hourly cron probe** at `/api/health/check` (scheduled in `web/vercel.json`) runs the probes, persists each tick to the `health_checks` Postgres table (jsonb snapshot for forensic replay), and POSTs to `ALERT_WEBHOOK_URL` if any required dep is down. Gated by `CRON_SECRET` in production.
-- **Per-query cost telemetry** is logged to `query_log` in Postgres. A rolling 24h sum feeds the `DAILY_COST_CEILING_USD` circuit breaker on `/api/search/sessions`.
+- **Per-query cost telemetry** is logged to `query_log` in Postgres. A rolling 24h sum feeds the `DAILY_COST_CEILING_USD` circuit breaker (default $5) on both the production homepage search path and `/api/search/sessions`. Shared helpers live in `web/lib/cost.ts`.
 - **Rate limiting**: Upstash sliding-window 30 req/min per IP and fixed 10k/day global, enforced in `web/proxy.ts`. Fails closed when Redis is unreachable.
 - **IP-count free tier**: anonymous IPs get 5 free searches per 24h (`lib/searchGate.ts`) before being redirected to `/login`. The password unlocks unlimited searches via a 30-day cookie.
 - **On-call runbook**: per-dependency failure modes and first-three-things-to-check at `docs/failure-recovery.md`.
 
 ## Stack
 
-**Ingest pipeline** (Python 3.11)
+**Ingest pipeline** (Python 3.12)
 - `yt-dlp`, `ffmpeg`, Deepgram nova-3
 - Resemblyzer for speaker fingerprinting
 - Anthropic Claude Sonnet 4.6 (tagger + audit)
@@ -195,12 +196,13 @@ Two evaluations back the claim that this works for the actual product goal — g
 - Upstash KV / Vercel KV (rate limiting + IP-count gate)
 
 **Inference**
-- OpenAI `gpt-4o-mini` for filter extraction, LLM judge, residual paraphrasing
+- OpenAI `gpt-4o-mini` for filter extraction (which also emits the residual
+  query text used for embedding) and the LLM judge re-rank
 - OpenAI `text-embedding-3-small` for retrieval embeddings
 - Anthropic Claude Sonnet 4.6 for the ingest-time tagger + audit (one-time per session)
 
 **Agent interface**
-- `@modelcontextprotocol/sdk` server at `/api/mcp` exposes `search_sessions` and `search_moments` tools. Bearer-token gated by `MCP_TOKEN` (required, fails closed).
+- `@modelcontextprotocol/sdk` server at `/api/mcp` exposes `search_moments` and `get_video` tools. Bearer-token gated by `MCP_TOKEN` (required, fails closed).
 
 ## Security model
 
@@ -220,8 +222,8 @@ Two evaluations back the claim that this works for the actual product goal — g
 acq_search_retrieval/
 ├── ingest/                  # Python pipeline (offline)
 │   ├── pipeline.py          # Top-level orchestrator
-│   ├── stages/              # fetch, transcribe, diarize, sessions, frames, tag
-│   ├── scripts/             # populate_sessions, retag_sessions, dedupe
+│   ├── stages/              # download, transcribe, diarize, sessions, scenes, tag
+│   ├── scripts/             # populate_sessions, retag_sessions_v2, dedupe_sessions
 │   ├── boundary_overrides.py
 │   └── schema.sql           # Neon Postgres schema
 │
@@ -232,7 +234,7 @@ acq_search_retrieval/
 │   │   ├── eval/            # Golden-set dashboard (dev-only)
 │   │   ├── v/[id]/          # Per-video moments debug (dev-only)
 │   │   └── api/
-│   │       ├── mcp/         # MCP server (search_sessions, search_moments)
+│   │       ├── mcp/         # MCP server (search_moments, get_video)
 │   │       ├── search*/     # JSON search endpoints (dev-only)
 │   │       ├── login/       # Auth cookie issuer
 │   │       ├── status/      # Corpus stats + per-dep health snapshot
@@ -277,6 +279,22 @@ acq_search_retrieval/
 │
 └── .env.example
 ```
+
+## Next steps: hardening observability
+
+Per-query cost telemetry (the `query_log` insert) and the `DAILY_COST_CEILING_USD`
+circuit breaker (a rolling 24h spend sum that refuses new searches once the
+ceiling is hit) currently run on both the dev-gated `/api/search/sessions` route
+and the production homepage search path (`app/page.tsx` → `searchSessions`), via
+the shared helpers in `web/lib/cost.ts`. Remaining hardening work:
+
+- Move spend accounting off the hot path (e.g. a cached/aggregated counter)
+  so the ceiling check doesn't add a Postgres round-trip to every homepage
+  search.
+- Alert on approaching the ceiling (not just enforce it), reusing the existing
+  `ALERT_WEBHOOK_URL` plumbing.
+- Add per-IP / per-token cost attribution so abuse can be traced, not just
+  globally throttled.
 
 ## License
 

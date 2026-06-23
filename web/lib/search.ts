@@ -202,6 +202,29 @@ function appendTimestamp(url: string, t: number): string {
   return `${url}${sep}t=${seconds}s`;
 }
 
+// Metadata + indexed moment/frame counts for a single video id. Backs the
+// `get_video` MCP tool. Returns null when the id is unknown.
+export async function getVideo(
+  videoId: string,
+): Promise<Record<string, unknown> | null> {
+  const rows = (await sql()`
+    select
+      v.id,
+      v.url,
+      v.title,
+      v.channel,
+      v.duration_s,
+      v.ingested_at,
+      v.last_indexed_at,
+      (select count(*) from moments m where m.video_id = v.id) as moment_count,
+      (select count(*) from frames f where f.video_id = v.id) as frame_count
+    from videos v
+    where v.id = ${videoId}
+    limit 1
+  `) as Record<string, unknown>[];
+  return rows[0] ?? null;
+}
+
 const STOPWORDS = new Set([
   "the","a","an","and","or","but","of","to","in","on","for","with","is","are",
   "was","were","be","been","being","this","that","these","those","i","you","he",

@@ -1,9 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
-import { sql } from "@/lib/db";
 import { MCP_TOKEN } from "@/lib/env";
-import { searchMoments } from "@/lib/search";
+import { getVideo, searchMoments } from "@/lib/search";
 
 export const runtime = "nodejs";
 
@@ -107,35 +106,21 @@ async function buildServer(): Promise<McpServer> {
     "get_video",
     {
       title: "Get video metadata",
-      description: "Look up metadata and indexed segment / frame counts for a single video id.",
+      description: "Look up metadata and indexed moment / frame counts for a single video id.",
       inputSchema: {
         video_id: z.string().describe("YouTube video id (e.g., LGbS0GOZBNE)."),
       },
     },
     async ({ video_id }) => {
-      const rows = (await sql()`
-        select
-          v.id,
-          v.url,
-          v.title,
-          v.channel,
-          v.duration_s,
-          v.ingested_at,
-          v.last_indexed_at,
-          (select count(*) from moments m where m.video_id = v.id) as moment_count,
-          (select count(*) from frames f where f.video_id = v.id) as frame_count
-        from videos v
-        where v.id = ${video_id}
-        limit 1
-      `) as Record<string, unknown>[];
-      if (rows.length === 0) {
+      const video = await getVideo(video_id);
+      if (!video) {
         return {
           isError: true,
           content: [{ type: "text", text: `Unknown video_id: ${video_id}` }],
         };
       }
       return {
-        content: [{ type: "text", text: JSON.stringify(rows[0], null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(video, null, 2) }],
       };
     },
   );

@@ -1,29 +1,22 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
 import { devRoutesEnabled } from "@/lib/env";
 import { searchSessions } from "@/lib/sessions";
-import { usageCostUSD } from "@/lib/openai";
+import {
+  DAILY_COST_CEILING_USD,
+  dailySpendUSD,
+  logQueryCost,
+} from "@/lib/cost";
 import type { Gender, Industry, RevenueBand, Topic } from "@/lib/taxonomy";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const MAX_QUERY_LEN = 500;
-const DAILY_COST_CEILING_USD = Number(process.env.DAILY_COST_CEILING_USD ?? "5");
 
 function parseTopicList(v: string | null): Topic[] | undefined {
   if (!v) return undefined;
   const parts = v.split(",").map((s) => s.trim()).filter(Boolean) as Topic[];
   return parts.length > 0 ? parts : undefined;
-}
-
-async function dailySpendUSD(): Promise<number> {
-  const rows = (await sql()`
-    select coalesce(sum(cost_usd), 0)::float as total
-    from query_log
-    where queried_at >= now() - interval '24 hours'
-  `) as Array<{ total: number }>;
-  return Number(rows[0]?.total ?? 0);
 }
 
 export async function POST(req: Request) {
@@ -74,17 +67,14 @@ export async function POST(req: Request) {
       k,
       filters: { industry, revenueBands, gender, topics },
     });
-    const costUSD = usageCostUSD(result.usage);
 
     // Fire-and-forget telemetry insert. Doesn't block the response.
-    sql()`
-      insert into query_log
-        (query_text, n_results, latency_ms, cost_usd,
-         llm_tokens_input, llm_tokens_output, embed_tokens)
-      values
-        (${query}, ${result.hits.length}, ${result.latencyMs}, ${costUSD},
-         ${result.usage.input}, ${result.usage.output}, ${result.usage.embed})
-    `.catch(() => undefined);
+    const costUSD = logQueryCost({
+      query,
+      nResults: result.hits.length,
+      latencyMs: result.latencyMs,
+      usage: result.usage,
+    });
 
     return NextResponse.json(
       {

@@ -1,6 +1,6 @@
 // Golden-set + validation section. Loads two artifacts at build time via
 // JSON import:
-//   - public/demo-eval-latest.json: 10 demo queries × full searchSessions
+//   - public/demo-eval-latest.json: 9 demo queries × full searchSessions
 //     pipeline. Written by `npx tsx scripts/demo_eval.ts`.
 //   - public/filter-eval-latest.json: extraction-accuracy + filter-fidelity
 //     report. Written by `npx tsx scripts/filter_eval.ts`.
