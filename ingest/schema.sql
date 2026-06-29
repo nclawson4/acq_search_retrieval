@@ -166,3 +166,28 @@ create table if not exists health_checks (
     snapshot     jsonb   not null
 );
 create index if not exists health_checks_time_idx on health_checks(checked_at desc);
+
+-- Structured span/event store for the search hot path + ingest. Written
+-- best-effort and fail-open by web/lib/telemetry.ts (the authoritative copy of
+-- every event is also emitted to stdout, so a missing row never loses data).
+-- Created here (offline, single-writer) — NOT on the per-request hot path —
+-- to avoid concurrent CREATE TABLE races under serverless cold starts.
+-- trace_id correlates events for one search (query_id) or one ingest run (run_id).
+create table if not exists trace_events (
+    id              bigserial primary key,
+    ts              timestamptz default now(),
+    trace_id        text not null,
+    surface         text not null,        -- search_sessions|search_moments|mcp|refusal|ingest|health
+    stage           text not null,
+    status          text not null,        -- ok|error|refused
+    duration_ms     integer,
+    dep             text,                 -- failing dependency on error rows
+    error_class     text,
+    error_message   text,
+    http_status     integer,
+    cost_usd        numeric,
+    attributes      jsonb default '{}'::jsonb
+);
+create index if not exists trace_events_trace_idx on trace_events(trace_id);
+create index if not exists trace_events_time_idx  on trace_events(ts desc);
+create index if not exists trace_events_err_idx   on trace_events(status, stage) where status <> 'ok';

@@ -2,11 +2,12 @@
 
 import { sql } from "./db";
 import { embedQuery } from "./embed";
-import { addUsage, emptyUsage, type TokenUsage } from "./openai";
+import { addUsage, emptyUsage, usageCostUSD, type TokenUsage } from "./openai";
 import { qdrant } from "./qdrant";
 import { judgeCandidates } from "./judge";
 import { extractFilters, type ExtractedFilters } from "./extract";
 import type { Gender, Industry, RevenueBand, Topic } from "./taxonomy";
+import { newQueryId, recordEvent } from "./telemetry";
 
 const COLLECTION_SESSIONS = "sessions";
 const OVERFETCH = 20;
@@ -43,6 +44,9 @@ export interface SessionSearchOptions {
     topics?: Topic[];
   };
   k?: number;
+  // Optional inbound correlation id (seeded from the proxy's x-request-id) so a
+  // search trace can be joined to the upstream request. Generated when absent.
+  queryId?: string;
 }
 
 export interface SessionSearchResult {
@@ -51,12 +55,16 @@ export interface SessionSearchResult {
   hits: SessionHit[];
   usage: TokenUsage;
   latencyMs: number;
+  // Correlation id for this search; safe to surface to clients / logs.
+  queryId?: string;
 }
 
 export async function searchSessions(
   opts: SessionSearchOptions,
 ): Promise<SessionSearchResult> {
   const t0 = Date.now();
+  const traceId = opts.queryId || newQueryId();
+  const timings: Record<string, number> = {};
   let usage = emptyUsage();
   const k = Math.min(50, Math.max(1, opts.k ?? 10));
   const rawQuery = opts.query.trim();
@@ -71,7 +79,9 @@ export async function searchSessions(
       topics: [], residualText: "",
     };
   } else {
+    const tk = Date.now();
     const x = await extractFilters(rawQuery);
+    timings.extract = Date.now() - tk;
     extracted = x.filters;
     usage = addUsage(usage, x.usage);
   }
@@ -106,7 +116,9 @@ export async function searchSessions(
 
   let queryVec: number[] = [];
   if (semanticText.length > 0) {
+    const tk = Date.now();
     queryVec = await embedQuery(semanticText);
+    timings.embed = Date.now() - tk;
     // text-embedding-3-small charges per input token. Rough estimate; OpenAI
     // does not return token usage on the embeddings response uniformly.
     usage = addUsage(usage, { embed: Math.ceil(semanticText.length / 4) });
@@ -135,6 +147,7 @@ export async function searchSessions(
   const filter = must.length > 0 ? { must } : undefined;
 
   // 4. Retrieve candidates.
+  const tq = Date.now();
   let points: Array<{ id: string | number; score: number; payload?: Record<string, unknown> | null }> = [];
   if (queryVec.length > 0) {
     const resp = await qdrant().query(COLLECTION_SESSIONS, {
@@ -158,13 +171,35 @@ export async function searchSessions(
     }));
   }
 
+  timings.qdrant = Date.now() - tq;
+
   if (points.length === 0) {
+    const latencyMs = Date.now() - t0;
+    recordEvent({
+      traceId,
+      surface: "search_sessions",
+      stage: "complete",
+      status: "ok",
+      durationMs: latencyMs,
+      costUsd: usageCostUSD(usage),
+      attributes: {
+        queryLen: rawQuery.length,
+        hardIndustry,
+        revenueBands,
+        gender,
+        semanticTextLen: semanticText.length,
+        candidatesReturned: 0,
+        hitsFinal: 0,
+        timings,
+      },
+    });
     return {
       query: rawQuery,
       extracted,
       hits: [],
       usage,
-      latencyMs: Date.now() - t0,
+      latencyMs,
+      queryId: traceId,
     };
   }
 
@@ -209,6 +244,8 @@ export async function searchSessions(
   // something specific (semantic text present). If no semantic text and
   // only filters were used, skip the judge. Chips speak for themselves.
   let judged: Record<string | number, { score: number; reason: string }> = {};
+  let judgeInputCount = 0;
+  let judgeResultsCount = 0;
   if (semanticText.length > 0 && points.length > 0) {
     const candidates = points.slice(0, JUDGE_INPUT_LIMIT).map((p) => {
       const pl = (p.payload ?? {}) as Record<string, unknown>;
@@ -220,8 +257,12 @@ export async function searchSessions(
         topics: Array.isArray(pl.topics) ? (pl.topics as string[]) : [],
       };
     });
+    judgeInputCount = candidates.length;
+    const tj = Date.now();
     const jr = await judgeCandidates(rawQuery, candidates);
+    timings.judge = Date.now() - tj;
     usage = addUsage(usage, jr.usage);
+    judgeResultsCount = jr.results.length;
     for (const r of jr.results) judged[String(r.id)] = { score: r.score, reason: r.reason };
   }
 
@@ -338,12 +379,43 @@ export async function searchSessions(
   const sameVideoCollapsed = deduped.filter((h) => keptIds.has(h.sessionId));
 
   sameVideoCollapsed.length = Math.min(sameVideoCollapsed.length, k);
+
+  const latencyMs = Date.now() - t0;
+  const judgeScores = sameVideoCollapsed.map((h) => h.judgeScore);
+  recordEvent({
+    traceId,
+    surface: "search_sessions",
+    stage: "complete",
+    status: "ok",
+    durationMs: latencyMs,
+    costUsd: usageCostUSD(usage),
+    attributes: {
+      queryLen: rawQuery.length,
+      hardIndustry,
+      revenueBands,
+      gender,
+      semanticTextLen: semanticText.length,
+      candidatesReturned: points.length,
+      judgeInputCount,
+      // 0 results from a non-empty judge input ⇒ judge returned empty/garbage —
+      // an error the user only feels as "no hits". Surfaced explicitly here.
+      judgeResultsCount,
+      judgeScoreMax: judgeScores.length ? Math.max(...judgeScores) : null,
+      hitsFinal: sameVideoCollapsed.length,
+      tokensInput: usage.input,
+      tokensOutput: usage.output,
+      tokensEmbed: usage.embed,
+      timings,
+    },
+  });
+
   return {
     query: rawQuery,
     extracted,
     hits: sameVideoCollapsed,
     usage,
-    latencyMs: Date.now() - t0,
+    latencyMs,
+    queryId: traceId,
   };
 }
 

@@ -56,20 +56,53 @@ function clientIp(req: NextRequest): string {
   return "anon";
 }
 
+// Edge-safe structured refusal log. A rate-limit/cap rejection happens before
+// any search runs, so without this line the most common "search stopped
+// working" outage would leave no trace. No DB import here — middleware runs on
+// the edge runtime; stdout is captured by Vercel's log drains.
+function logRefusal(requestId: string, reason: string, ip?: string) {
+  try {
+    console.warn(
+      JSON.stringify({
+        service: "acq-search-retrieval-proxy",
+        event: "refusal",
+        request_id: requestId,
+        reason,
+        ip,
+      }),
+    );
+  } catch {
+    /* never throw from logging */
+  }
+}
+
+function passThrough(req: NextRequest, requestId: string): NextResponse {
+  // Stamp x-request-id on the forwarded request so the server component / route
+  // can seed its query_id from it (cross-layer correlation).
+  const headers = new Headers(req.headers);
+  headers.set("x-request-id", requestId);
+  const res = NextResponse.next({ request: { headers } });
+  res.headers.set("x-request-id", requestId);
+  return res;
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const requestId =
+    req.headers.get("x-request-id") || crypto.randomUUID().replace(/-/g, "");
 
   // Rate-limit the cost-driver paths only (LLM/embedding-backed). The home
   // page calls searchSessions server-side, so anonymous query counting lives
   // in app/page.tsx and is gated against the same Redis store.
   const isRateLimited =
     pathname.startsWith("/api/search") || pathname.startsWith("/api/mcp");
-  if (!isRateLimited) return NextResponse.next();
+  if (!isRateLimited) return passThrough(req, requestId);
 
   // Fail closed: if KV isn't configured (or initialisation failed earlier)
   // the rate-limited paths are refused with 503. Letting them through with
   // no metering would expose the OpenAI cost budget to anyone with the URL.
   if (!perIp || !dailyCap) {
+    logRefusal(requestId, "rate_limiter_unavailable");
     return new NextResponse(
       JSON.stringify({
         error: "Rate limiter unavailable. Try again shortly.",
@@ -79,6 +112,7 @@ export async function proxy(req: NextRequest) {
         headers: {
           "content-type": "application/json",
           "x-ratelimit-scope": "unavailable",
+          "x-request-id": requestId,
         },
       },
     );
@@ -93,18 +127,20 @@ export async function proxy(req: NextRequest) {
     ]);
   } catch {
     // Same fail-closed posture if the limiter throws mid-call.
+    logRefusal(requestId, "rate_limiter_threw", ip);
     return new NextResponse(
       JSON.stringify({
         error: "Rate limiter unavailable. Try again shortly.",
       }),
       {
         status: 503,
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-request-id": requestId },
       },
     );
   }
 
   if (!capResult.success) {
+    logRefusal(requestId, "rate_limit_global", ip);
     return new NextResponse(
       JSON.stringify({
         error: "Daily demo limit reached. Resets at UTC midnight.",
@@ -114,11 +150,13 @@ export async function proxy(req: NextRequest) {
         headers: {
           "content-type": "application/json",
           "x-ratelimit-scope": "global",
+          "x-request-id": requestId,
         },
       },
     );
   }
   if (!ipResult.success) {
+    logRefusal(requestId, "rate_limit_ip", ip);
     const retryAfter = Math.max(1, Math.ceil((ipResult.reset - Date.now()) / 1000));
     return new NextResponse(
       JSON.stringify({
@@ -130,12 +168,13 @@ export async function proxy(req: NextRequest) {
           "content-type": "application/json",
           "retry-after": String(retryAfter),
           "x-ratelimit-scope": "ip",
+          "x-request-id": requestId,
         },
       },
     );
   }
 
-  const res = NextResponse.next();
+  const res = passThrough(req, requestId);
   res.headers.set("x-ratelimit-limit", String(PER_MIN));
   res.headers.set("x-ratelimit-remaining", String(Math.max(0, ipResult.remaining)));
   return res;

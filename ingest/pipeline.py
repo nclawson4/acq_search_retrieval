@@ -47,6 +47,11 @@ from stages.push import (
 from stages.scenes import extract_keyframes
 from stages.transcribe import transcribe
 
+try:
+    import observability as obs  # structured run logging; strictly optional
+except Exception:  # pragma: no cover
+    obs = None  # type: ignore
+
 
 def _read_urls(arg: str) -> list[str]:
     p = Path(arg)
@@ -196,17 +201,37 @@ def main(argv: list[str] | None = None) -> int:
     urls = _read_urls(args.input)
     _log(f"Ingesting {len(urls)} URL(s)")
 
+    run_id = obs.new_run_id() if obs else ""
+    if obs:
+        obs.log_event("ingest.run.start", run_id=run_id, n_urls=len(urls))
+
     results: list[dict] = []
     for url in urls:
+        _t0 = time.time()
         try:
-            results.append(ingest_one(url, force=args.force))
+            r = ingest_one(url, force=args.force)
+            results.append(r)
+            if obs:
+                obs.log_event(
+                    "ingest.video.ok", run_id=run_id, url=url,
+                    skipped=bool(r.get("skipped")),
+                    n_moments=r.get("moments"), n_frames=r.get("frames"),
+                    duration_ms=round((time.time() - _t0) * 1000, 1),
+                )
         except Exception as exc:  # noqa: BLE001
             _log(f"  ERROR on {url}: {exc!r}")
             traceback.print_exc()
             results.append({"url": url, "error": repr(exc)})
+            if obs:
+                obs.log_error("ingest", exc, run_id=run_id, url=url)
 
     ok = sum(1 for r in results if r.get("moments") is not None or r.get("skipped"))
     _log(f"Done — {ok}/{len(results)} succeeded or skipped")
+    if obs:
+        obs.log_event(
+            "ingest.run.done", run_id=run_id,
+            n_ok=ok, n_total=len(results), n_error=len(results) - ok,
+        )
     return 0 if ok == len(results) else 1
 
 

@@ -10,6 +10,7 @@ import SearchProgressBar from "@/components/SearchProgressBar";
 import { incrementAnonymousSearch } from "@/lib/searchGate";
 import { isOverDailyCeiling, logQueryCost } from "@/lib/cost";
 import { searchSessions, type SessionHit } from "@/lib/sessions";
+import { newQueryId, recordError, recordRefusal } from "@/lib/telemetry";
 import {
   INDUSTRIES,
   INDUSTRY_LABELS,
@@ -59,6 +60,11 @@ export default async function Home({
 
   const hasAnyInput = !!(query || industry || revenue || gender || topics.length > 0);
 
+  // Correlation id for this search, seeded from the proxy's x-request-id when
+  // present so the edge log line and the search trace join on one id.
+  const queryId =
+    (hasAnyInput ? (await headers()).get("x-request-id") : null) || newQueryId();
+
   // IP-based gate: anonymous IPs get SEARCH_FREE_LIMIT searches per rolling
   // 24h before the demo password is required. Authenticated cookie skips this.
   if (hasAnyInput) {
@@ -86,6 +92,7 @@ export default async function Home({
         "anonymous";
       const { overLimit } = await incrementAnonymousSearch(ip);
       if (overLimit) {
+        recordRefusal(queryId, "free_tier", { ip });
         const back = `/?${new URLSearchParams({
           ...(query ? { q: query } : {}),
           ...(industry ? { industry } : {}),
@@ -115,6 +122,7 @@ export default async function Home({
     // open on DB error, so a transient Postgres blip never blocks search; only
     // a real over-spend does. Returned as a normal error result (not thrown).
     if (await isOverDailyCeiling()) {
+      recordRefusal(queryId, "cost_ceiling");
       return {
         hits: [],
         extracted: null,
@@ -134,6 +142,7 @@ export default async function Home({
           topics,
         },
         k: 20,
+        queryId,
       });
       // Fire-and-forget per-query cost telemetry. Never throws; a logging
       // failure must not break search.
@@ -151,6 +160,10 @@ export default async function Home({
         costUSD,
       };
     } catch (err) {
+      // The cost-ceiling read failed open above, so reaching here is a real
+      // search failure (OpenAI / Qdrant / Postgres). Record it with the same
+      // queryId for root-cause without a repro.
+      recordError("search_sessions", "complete", queryId, err);
       return {
         hits: [],
         extracted: null,
